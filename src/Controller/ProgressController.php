@@ -48,27 +48,21 @@ class ProgressController
             return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
         }
 
-        try {
-            $progress = $this->progressService->createProgress(
-                $createRequest->userId,
-                $createRequest->lessonId,
-                $createRequest->requestId
-            );
+        $progress = $this->progressService->createProgress(
+            $createRequest->userId,
+            $createRequest->lessonId,
+            $createRequest->requestId
+        );
 
-            return new JsonResponse([
-                'id' => $progress->getId(),
-                'user_id' => $progress->getUser()->getId(),
-                'lesson_id' => $progress->getLesson()->getId(),
-                'lesson_title' => $progress->getLesson()->getTitle(),
-                'status' => $progress->getStatus(),
-                'request_id' => $progress->getRequestId(),
-                'completed_at' => $progress->getCompletedAt() ? $progress->getCompletedAt()->format('Y-m-d H:i:s') : null
-            ], Response::HTTP_CREATED);
-
-        } catch (\Exception $e) {
-            // Exception mapping will be handled by ExceptionListener
-            throw $e;
-        }
+        return new JsonResponse([
+            'id' => $progress->getId(),
+            'user_id' => $progress->getUser()->getId(),
+            'lesson_id' => $progress->getLesson()->getId(),
+            'lesson_title' => $progress->getLesson()->getTitle(),
+            'status' => $progress->getStatus(),
+            'request_id' => $progress->getRequestId(),
+            'completed_at' => $progress->getCompletedAt() ? $progress->getCompletedAt()->format('Y-m-d H:i:s') : null
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('', methods: ['GET'])]
@@ -85,26 +79,20 @@ class ProgressController
             return new JsonResponse(['error' => 'course_id parameter is required and must be numeric'], Response::HTTP_BAD_REQUEST);
         }
 
-        try {
-            $progressList = $this->progressService->getUserProgress((int) $userId, (int) $courseId);
+        $progressList = $this->progressService->getUserProgress((int) $userId, (int) $courseId);
 
-            $progressData = array_map(function ($progress) {
-                return [
-                    'id' => $progress->getId(),
-                    'user_id' => $progress->getUser()->getId(),
-                    'lesson_id' => $progress->getLesson()->getId(),
-                    'lesson_title' => $progress->getLesson()->getTitle(),
-                    'status' => $progress->getStatus(),
-                    'request_id' => $progress->getRequestId(),
-                    'completed_at' => $progress->getCompletedAt() ? $progress->getCompletedAt()->format('Y-m-d H:i:s') : null
-                ];
-            }, $progressList);
+        $progressData = array_map(function ($progress) {
+            return [
+                'id' => $progress->getId(),
+                'user_id' => $progress->getUser()->getId(),
+                'lesson_id' => $progress->getLesson()->getId(),
+                'lesson_title' => $progress->getLesson()->getTitle(),
+                'status' => $progress->getStatus(),
+                'request_id' => $progress->getRequestId(),
+                'completed_at' => $progress->getCompletedAt() ? $progress->getCompletedAt()->format('Y-m-d H:i:s') : null
+            ];
+        }, $progressList);
 
-            return new JsonResponse(['progress' => $progressData], Response::HTTP_OK);
-
-        } catch (\Exception $e) {
-            // Exception mapping will be handled by ExceptionListener
-            throw $e;
-        }
+        return new JsonResponse(['progress' => $progressData], Response::HTTP_OK);
     }
 }

@@ -47,25 +47,19 @@ class EnrollmentController
             return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
         }
 
-        try {
-            $enrollment = $this->enrollmentService->enrollUser(
-                $createRequest->userId,
-                $createRequest->courseId
-            );
+        $enrollment = $this->enrollmentService->enrollUser(
+            $createRequest->userId,
+            $createRequest->courseId
+        );
 
-            return new JsonResponse([
-                'id' => $enrollment->getId(),
-                'user_id' => $enrollment->getUser()->getId(),
-                'course_id' => $enrollment->getCourse()->getId(),
-                'status' => $enrollment->getStatus(),
-                'enrolled_at' => $enrollment->getEnrolledAt()->format('Y-m-d H:i:s'),
-                'completed_at' => $enrollment->getCompletedAt() ? $enrollment->getCompletedAt()->format('Y-m-d H:i:s') : null
-            ], Response::HTTP_CREATED);
-
-        } catch (\Exception $e) {
-            // Exception mapping will be handled by ExceptionListener
-            throw $e;
-        }
+        return new JsonResponse([
+            'id' => $enrollment->getId(),
+            'user_id' => $enrollment->getUser()->getId(),
+            'course_id' => $enrollment->getCourse()->getId(),
+            'status' => $enrollment->getStatus(),
+            'enrolled_at' => $enrollment->getEnrolledAt()->format('Y-m-d H:i:s'),
+            'completed_at' => $enrollment->getCompletedAt() ? $enrollment->getCompletedAt()->format('Y-m-d H:i:s') : null
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('', methods: ['GET'])]
@@ -77,26 +71,20 @@ class EnrollmentController
             return new JsonResponse(['error' => 'user_id parameter is required and must be numeric'], Response::HTTP_BAD_REQUEST);
         }
 
-        try {
-            $enrollments = $this->enrollmentService->getUserEnrollments((int) $userId);
+        $enrollments = $this->enrollmentService->getUserEnrollments((int) $userId);
 
-            $enrollmentsData = array_map(function ($enrollment) {
-                return [
-                    'id' => $enrollment->getId(),
-                    'user_id' => $enrollment->getUser()->getId(),
-                    'course_id' => $enrollment->getCourse()->getId(),
-                    'course_title' => $enrollment->getCourse()->getTitle(),
-                    'status' => $enrollment->getStatus(),
-                    'enrolled_at' => $enrollment->getEnrolledAt()->format('Y-m-d H:i:s'),
-                    'completed_at' => $enrollment->getCompletedAt() ? $enrollment->getCompletedAt()->format('Y-m-d H:i:s') : null
-                ];
-            }, $enrollments);
+        $enrollmentsData = array_map(function ($enrollment) {
+            return [
+                'id' => $enrollment->getId(),
+                'user_id' => $enrollment->getUser()->getId(),
+                'course_id' => $enrollment->getCourse()->getId(),
+                'course_title' => $enrollment->getCourse()->getTitle(),
+                'status' => $enrollment->getStatus(),
+                'enrolled_at' => $enrollment->getEnrolledAt()->format('Y-m-d H:i:s'),
+                'completed_at' => $enrollment->getCompletedAt() ? $enrollment->getCompletedAt()->format('Y-m-d H:i:s') : null
+            ];
+        }, $enrollments);
 
-            return new JsonResponse(['enrollments' => $enrollmentsData], Response::HTTP_OK);
-
-        } catch (\Exception $e) {
-            // Exception mapping will be handled by ExceptionListener
-            throw $e;
-        }
+        return new JsonResponse(['enrollments' => $enrollmentsData], Response::HTTP_OK);
     }
 }
