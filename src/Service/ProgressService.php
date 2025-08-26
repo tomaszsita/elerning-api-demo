@@ -9,6 +9,7 @@ use App\Enum\ProgressStatus;
 use App\Exception\InvalidStatusTransitionException;
 use App\Exception\UserNotFoundException;
 use App\Exception\LessonNotFoundException;
+use App\Exception\PrerequisitesNotMetException;
 use App\Repository\UserRepository;
 use App\Repository\LessonRepository;
 use App\Repository\ProgressRepository;
@@ -22,62 +23,65 @@ class ProgressService
         UserRepository $userRepository,
         LessonRepository $lessonRepository,
         ProgressRepository $progressRepository,
-        EnrollmentService $enrollmentService,
         EventDispatcherInterface $eventDispatcher
     ) {
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
         $this->lessonRepository = $lessonRepository;
         $this->progressRepository = $progressRepository;
-        $this->enrollmentService = $enrollmentService;
         $this->eventDispatcher = $eventDispatcher;
+        
+
     }
 
     private EntityManagerInterface $entityManager;
     private UserRepository $userRepository;
     private LessonRepository $lessonRepository;
     private ProgressRepository $progressRepository;
-    private EnrollmentService $enrollmentService;
     private EventDispatcherInterface $eventDispatcher;
 
     public function createProgress(int $userId, int $lessonId, string $requestId, string $status = 'complete'): Progress
     {
-        // IDEMPOTENCY: Sprawdź czy już istnieje progress z tym request_id
+        // IDEMPOTENCY: Check if progress with this request_id already exists
         $existingProgress = $this->progressRepository->findByRequestId($requestId);
         if ($existingProgress) {
-            return $existingProgress; // Idempotency - zwróć istniejący
+            return $existingProgress; // Idempotency - return existing
         }
 
-        // Sprawdź czy użytkownik istnieje
+        // Check if user exists
         $user = $this->userRepository->find($userId);
         if (!$user) {
             throw new UserNotFoundException($userId);
         }
 
-        // Sprawdź czy lekcja istnieje
+        // Check if lesson exists
         $lesson = $this->lessonRepository->find($lessonId);
         if (!$lesson) {
             throw new LessonNotFoundException($lessonId);
         }
 
-        // Sprawdź czy użytkownik jest zapisany na kurs tej lekcji
-        if (!$this->enrollmentService->isUserEnrolled($userId, $lesson->getCourse()->getId())) {
+        // Check if user is enrolled in the course of this lesson
+        $enrollmentRepository = $this->entityManager->getRepository(\App\Entity\Enrollment::class);
+        if (!$enrollmentRepository->existsByUserAndCourse($userId, $lesson->getCourse()->getId())) {
             throw new \App\Exception\UserNotEnrolledException($userId, $lesson->getCourse()->getId());
         }
 
-        // Sprawdź czy status jest prawidłowy
+        // Check prerequisites - user must complete all previous lessons
+        $this->checkPrerequisites($userId, $lesson);
+
+        // Check if status is valid
         try {
             $progressStatus = ProgressStatus::fromString($status);
         } catch (\InvalidArgumentException $e) {
             throw new InvalidStatusTransitionException('', $status);
         }
 
-        // Utwórz nowy progress
+        // Create new progress
         $progress = new Progress();
         $progress->setUser($user);
         $progress->setLesson($lesson);
         $progress->setRequestId($requestId);
-        $progress->setStatus($status);
+        $progress->setStatus($progressStatus);
 
         if ($status === 'complete') {
             $progress->setCompletedAt(new \DateTimeImmutable());
@@ -86,7 +90,7 @@ class ProgressService
         $this->entityManager->persist($progress);
         $this->entityManager->flush();
 
-        // Wyślij event
+        // Dispatch event
         if ($status === 'complete') {
             $this->eventDispatcher->dispatch(
                 new \App\Event\ProgressCompletedEvent($progress),
@@ -106,13 +110,14 @@ class ProgressService
 
         $currentStatus = $progress->getStatus();
 
-        // Sprawdź czy przejście jest dozwolone
-        if (!ProgressStatus::canTransition($currentStatus, $newStatus)) {
-            throw new InvalidStatusTransitionException($currentStatus, $newStatus);
+        // Check if transition is allowed
+        $newStatusEnum = ProgressStatus::fromString($newStatus);
+        if (!ProgressStatus::canTransition($currentStatus, $newStatusEnum)) {
+            throw new InvalidStatusTransitionException($currentStatus ? $currentStatus->name : '', $newStatus);
         }
 
-        // Aktualizuj status
-        $progress->setStatus($newStatus);
+        // Update status
+        $progress->setStatus($newStatusEnum);
 
         if ($newStatus === 'complete') {
             $progress->setCompletedAt(new \DateTimeImmutable());
@@ -120,7 +125,7 @@ class ProgressService
 
         $this->entityManager->flush();
 
-        // Wyślij event
+        // Dispatch event
         if ($newStatus === 'complete') {
             $this->eventDispatcher->dispatch(
                 new \App\Event\ProgressCompletedEvent($progress),
@@ -133,7 +138,7 @@ class ProgressService
 
     public function getUserProgress(int $userId, int $courseId): array
     {
-        // Sprawdź czy użytkownik istnieje
+        // Check if user exists
         $user = $this->userRepository->find($userId);
         if (!$user) {
             throw new UserNotFoundException($userId);
@@ -145,5 +150,30 @@ class ProgressService
     public function getProgressByRequestId(string $requestId): ?Progress
     {
         return $this->progressRepository->findByRequestId($requestId);
+    }
+
+    private function checkPrerequisites(int $userId, Lesson $lesson): void
+    {
+        $course = $lesson->getCourse();
+        $currentOrderIndex = $lesson->getOrderIndex();
+
+        // Get all lessons with lower orderIndex in the same course
+        $prerequisiteLessons = $this->lessonRepository->findByCourseAndOrderLessThan(
+            $course->getId(),
+            $currentOrderIndex
+        );
+
+        // Check if user completed all previous lessons
+        foreach ($prerequisiteLessons as $prerequisiteLesson) {
+            $progress = $this->progressRepository->findByUserAndLesson($userId, $prerequisiteLesson->getId());
+            
+            if (!$progress || $progress->getStatus() !== 'complete') {
+                throw new PrerequisitesNotMetException(
+                    $userId,
+                    $lesson->getId(),
+                    "User {$userId} must complete lesson '{$prerequisiteLesson->getTitle()}' before accessing lesson '{$lesson->getTitle()}'"
+                );
+            }
+        }
     }
 }

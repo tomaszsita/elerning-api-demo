@@ -29,6 +29,8 @@ class EnrollmentService
         $this->courseRepository = $courseRepository;
         $this->enrollmentRepository = $enrollmentRepository;
         $this->eventDispatcher = $eventDispatcher;
+        
+
     }
 
     private EntityManagerInterface $entityManager;
@@ -39,27 +41,27 @@ class EnrollmentService
 
     public function enrollUser(int $userId, int $courseId): Enrollment
     {
-        // Sprawdź czy użytkownik istnieje
+        // Check if user exists
         $user = $this->userRepository->find($userId);
         if (!$user) {
             throw new UserNotFoundException($userId);
         }
 
-        // Sprawdź czy kurs istnieje
+        // Check if course exists
         $course = $this->courseRepository->find($courseId);
         if (!$course) {
             throw new CourseNotFoundException($courseId);
         }
 
-        // Sprawdź czy użytkownik już jest zapisany
+        // Check if user is already enrolled
         if ($this->enrollmentRepository->existsByUserAndCourse($userId, $courseId)) {
             throw new UserAlreadyEnrolledException($userId, $courseId);
         }
 
-        // Sprawdź czy są wolne miejsca (z pessimistic locking)
+        // Check if there are available seats (with pessimistic locking)
         $this->entityManager->beginTransaction();
         try {
-            // Lock kurs dla atomic operation
+            // Lock course for atomic operation
             $course = $this->entityManager->find(Course::class, $courseId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE);
             
             $enrollmentCount = $this->courseRepository->countEnrollmentsByCourse($courseId);
@@ -68,7 +70,7 @@ class EnrollmentService
                 throw new CourseFullException($courseId);
             }
 
-            // Utwórz enrollment
+            // Create enrollment
             $enrollment = new Enrollment();
             $enrollment->setUser($user);
             $enrollment->setCourse($course);
@@ -78,7 +80,7 @@ class EnrollmentService
             $this->entityManager->flush();
             $this->entityManager->commit();
 
-            // Wyślij event
+            // Dispatch event
             $this->eventDispatcher->dispatch(
                 new \App\Event\EnrollmentCreatedEvent($enrollment),
                 'enrollment.created'
@@ -93,7 +95,7 @@ class EnrollmentService
 
     public function getUserEnrollments(int $userId): array
     {
-        // Sprawdź czy użytkownik istnieje
+        // Check if user exists
         $user = $this->userRepository->find($userId);
         if (!$user) {
             throw new UserNotFoundException($userId);
