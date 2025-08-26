@@ -11,10 +11,10 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends ServiceEntityRepository<Lesson>
  *
- * @method Lesson|null find($id, $lockMode = null, $lockVersion = null)
- * @method Lesson|null findOneBy(array $criteria, array $orderBy = null)
- * @method Lesson[]    findAll()
- * @method Lesson[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Lesson|null find(int|string $id, \Doctrine\DBAL\LockMode|int|null $lockMode = null, int|null $lockVersion = null)
+ * @method Lesson|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)
+ * @method Lesson[] findAll()
+ * @method Lesson[] findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, int|null $limit = null, int|null $offset = null)
  */
 class LessonRepository extends ServiceEntityRepository implements LessonRepositoryInterface
 {

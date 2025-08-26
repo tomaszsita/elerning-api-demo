@@ -168,9 +168,23 @@
 - Ignore Doctrine-specific patterns
 - Custom ignore patterns for common false positives
 
+**Ignored Patterns:**
+- **Doctrine repositories** - `$_em` property access and `find()` method calls
+- **PHPUnit mocks** - `expects()` method calls and test properties
+- **Doctrine collections** - Generic type specifications
+- **Array return types** - Missing value type specifications (can be improved with PHP 8.4+)
+- **Entity ID properties** - Unused int type in nullable properties
+- **Value objects** - Undefined `$value` property access
+- **Bootstrap** - `method_exists()` function calls
+
 **Commands:**
 - `composer phpstan` - Run static analysis
 - `composer phpstan:baseline` - Generate baseline for new errors
+
+**Future Improvements:**
+- **PHP 8.4+ attributes** - Replace PHPDoc with `#[method]` attributes when supported
+- **Generic collections** - Add proper generic types to Doctrine collections
+- **Array return types** - Specify value types in array return types
 
 ## Performance & Scalability
 
