@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\EnrollmentRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EnrollmentRepository::class)]
 #[ORM\Table(name: 'enrollments')]
@@ -22,6 +23,7 @@ class Enrollment
     private ?\DateTimeImmutable $completedAt = null;
 
     #[ORM\Column(length: 20)]
+    #[Assert\Choice(choices: ['enrolled', 'completed', 'cancelled'])]
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'enrollments')]

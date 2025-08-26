@@ -6,6 +6,7 @@ use App\Repository\LessonRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: LessonRepository::class)]
 #[ORM\Table(name: 'lessons')]
@@ -17,12 +18,16 @@ class Lesson
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 1, max: 255)]
     private ?string $title = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\Length(max: 50000)]
     private ?string $content = null;
 
     #[ORM\Column]
+    #[Assert\PositiveOrZero]
     private ?int $orderIndex = null;
 
     #[ORM\Column]
