@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Course;
+
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -30,5 +31,11 @@ class CourseRepository extends ServiceEntityRepository
             ->setParameter('courseId', $courseId)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    public function save(Course $course): void
+    {
+        $this->_em->persist($course);
+        $this->_em->flush();
     }
 }

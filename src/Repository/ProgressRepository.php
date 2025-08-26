@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Progress;
+
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -38,5 +39,11 @@ class ProgressRepository extends ServiceEntityRepository
     public function findByRequestId(string $requestId): ?Progress
     {
         return $this->findOneBy(['requestId' => $requestId]);
+    }
+
+    public function save(Progress $progress): void
+    {
+        $this->_em->persist($progress);
+        $this->_em->flush();
     }
 }

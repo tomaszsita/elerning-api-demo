@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Enrollment;
+
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -42,5 +43,11 @@ class EnrollmentRepository extends ServiceEntityRepository
             ->setParameter('userId', $userId)
             ->getQuery()
             ->getResult();
+    }
+
+    public function save(Enrollment $enrollment): void
+    {
+        $this->_em->persist($enrollment);
+        $this->_em->flush();
     }
 }
