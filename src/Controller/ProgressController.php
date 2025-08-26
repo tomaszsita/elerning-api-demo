@@ -54,15 +54,7 @@ class ProgressController
             $createRequest->requestId
         );
 
-        return new JsonResponse([
-            'id' => $progress->getId(),
-            'user_id' => $progress->getUser()->getId(),
-            'lesson_id' => $progress->getLesson()->getId(),
-            'lesson_title' => $progress->getLesson()->getTitle(),
-            'status' => $progress->getStatus(),
-            'request_id' => $progress->getRequestId(),
-            'completed_at' => $progress->getCompletedAt() ? $progress->getCompletedAt()->format('Y-m-d H:i:s') : null
-        ], Response::HTTP_CREATED);
+        return new JsonResponse($progress->toArray(), Response::HTTP_CREATED);
     }
 
     #[Route('', methods: ['GET'])]

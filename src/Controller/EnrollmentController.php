@@ -52,14 +52,7 @@ class EnrollmentController
             $createRequest->courseId
         );
 
-        return new JsonResponse([
-            'id' => $enrollment->getId(),
-            'user_id' => $enrollment->getUser()->getId(),
-            'course_id' => $enrollment->getCourse()->getId(),
-            'status' => $enrollment->getStatus(),
-            'enrolled_at' => $enrollment->getEnrolledAt()->format('Y-m-d H:i:s'),
-            'completed_at' => $enrollment->getCompletedAt() ? $enrollment->getCompletedAt()->format('Y-m-d H:i:s') : null
-        ], Response::HTTP_CREATED);
+        return new JsonResponse($enrollment->toArray(), Response::HTTP_CREATED);
     }
 
     #[Route('', methods: ['GET'])]

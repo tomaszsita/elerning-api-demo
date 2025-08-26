@@ -13,6 +13,7 @@ use App\Exception\PrerequisitesNotMetException;
 use App\Repository\Interfaces\UserRepositoryInterface;
 use App\Repository\Interfaces\LessonRepositoryInterface;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
+use App\Repository\Interfaces\EnrollmentRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -23,12 +24,14 @@ class ProgressService
         UserRepositoryInterface $userRepository,
         LessonRepositoryInterface $lessonRepository,
         ProgressRepositoryInterface $progressRepository,
+        EnrollmentRepositoryInterface $enrollmentRepository,
         EventDispatcherInterface $eventDispatcher
     ) {
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
         $this->lessonRepository = $lessonRepository;
         $this->progressRepository = $progressRepository;
+        $this->enrollmentRepository = $enrollmentRepository;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -36,6 +39,7 @@ class ProgressService
     private UserRepositoryInterface $userRepository;
     private LessonRepositoryInterface $lessonRepository;
     private ProgressRepositoryInterface $progressRepository;
+    private EnrollmentRepositoryInterface $enrollmentRepository;
     private EventDispatcherInterface $eventDispatcher;
 
     public function createProgress(int $userId, int $lessonId, string $requestId, string $status = 'complete'): Progress
@@ -55,8 +59,7 @@ class ProgressService
             throw new LessonNotFoundException($lessonId);
         }
 
-        $enrollmentRepository = $this->entityManager->getRepository(\App\Entity\Enrollment::class);
-        if (!$enrollmentRepository->existsByUserAndCourse($userId, $lesson->getCourse()->getId())) {
+        if (!$this->enrollmentRepository->existsByUserAndCourse($userId, $lesson->getCourse()->getId())) {
             throw new \App\Exception\UserNotEnrolledException($userId, $lesson->getCourse()->getId());
         }
 
@@ -74,8 +77,10 @@ class ProgressService
         $progress->setRequestId($requestId);
         $progress->setStatus($progressStatus);
 
+        $completedAt = null;
         if ($status === 'complete') {
-            $progress->setCompletedAt(new \DateTimeImmutable());
+            $completedAt = new \DateTimeImmutable();
+            $progress->setCompletedAt($completedAt);
         }
 
         $this->entityManager->persist($progress);
