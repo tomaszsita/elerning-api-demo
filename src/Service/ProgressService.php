@@ -6,7 +6,6 @@ use App\Entity\Progress;
 use App\Entity\User;
 use App\Entity\Lesson;
 use App\Enum\ProgressStatus;
-use App\Exception\InvalidStatusTransitionException;
 use App\Exception\UserNotFoundException;
 use App\Exception\LessonNotFoundException;
 use App\Exception\PrerequisitesNotMetException;
@@ -62,28 +61,10 @@ class ProgressService
         return $progress;
     }
 
-    public function updateProgressStatus(int $progressId, string $newStatus): Progress
-    {
-        $progress = $this->validateAndGetProgress($progressId);
-        $newStatusEnum = $this->validateAndGetStatus($newStatus);
-        
-        $this->validateStatusTransition($progress->getStatus(), $newStatusEnum);
-        $this->updateProgressEntity($progress, $newStatusEnum);
-        $this->saveProgress($progress);
-        $this->dispatchCompletionEventIfNeeded($progress, $newStatus);
-
-        return $progress;
-    }
-
     public function getUserProgress(int $userId, int $courseId): array
     {
         $this->validateAndGetUser($userId);
         return $this->progressRepository->findByUserAndCourse($userId, $courseId);
-    }
-
-    public function getProgressByRequestId(string $requestId): ?Progress
-    {
-        return $this->progressRepository->findByRequestId($requestId);
     }
 
     private function validateAndGetUser(int $userId): User
@@ -104,14 +85,7 @@ class ProgressService
         return $lesson;
     }
 
-    private function validateAndGetProgress(int $progressId): Progress
-    {
-        $progress = $this->entityManager->find(Progress::class, $progressId);
-        if (!$progress) {
-            throw new \App\Exception\ProgressNotFoundException($progressId);
-        }
-        return $progress;
-    }
+
 
     private function validateEnrollment(int $userId, Lesson $lesson): void
     {
@@ -129,16 +103,6 @@ class ProgressService
         }
     }
 
-    private function validateStatusTransition(?ProgressStatus $currentStatus, ProgressStatus $newStatus): void
-    {
-        if (!ProgressStatus::canTransition($currentStatus, $newStatus)) {
-            throw new InvalidStatusTransitionException(
-                $currentStatus ? $currentStatus->name : '', 
-                $newStatus->value
-            );
-        }
-    }
-
     private function createProgressEntity(User $user, Lesson $lesson, string $requestId, ProgressStatus $status): Progress
     {
         $progress = new Progress();
@@ -152,15 +116,6 @@ class ProgressService
         }
 
         return $progress;
-    }
-
-    private function updateProgressEntity(Progress $progress, ProgressStatus $newStatus): void
-    {
-        $progress->setStatus($newStatus);
-
-        if ($newStatus === ProgressStatus::COMPLETE) {
-            $progress->setCompletedAt(new \DateTimeImmutable());
-        }
     }
 
     private function saveProgress(Progress $progress): void

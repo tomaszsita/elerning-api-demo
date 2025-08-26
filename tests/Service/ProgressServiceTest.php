@@ -9,10 +9,8 @@ use App\Entity\Progress;
 use App\Entity\User;
 use App\Enum\ProgressStatus;
 use App\Event\ProgressCompletedEvent;
-use App\Exception\InvalidStatusTransitionException;
 use App\Exception\LessonNotFoundException;
 use App\Exception\PrerequisitesNotMetException;
-use App\Exception\ProgressNotFoundException;
 use App\Exception\UserNotEnrolledException;
 use App\Exception\UserNotFoundException;
 use App\Repository\Interfaces\EnrollmentRepositoryInterface;
@@ -263,70 +261,7 @@ class ProgressServiceTest extends TestCase
         $this->progressService->createProgress(1, 1, 'test-request-123');
     }
 
-    public function testUpdateProgressStatusSuccess(): void
-    {
-        $progress = $this->createMock(Progress::class);
-        $currentStatus = ProgressStatus::PENDING;
 
-        $this->entityManager->expects($this->once())
-            ->method('find')
-            ->with(Progress::class, 1)
-            ->willReturn($progress);
-
-        $progress->expects($this->once())
-            ->method('getStatus')
-            ->willReturn($currentStatus);
-
-        $progress->expects($this->once())
-            ->method('setStatus')
-            ->with(ProgressStatus::COMPLETE);
-
-        $progress->expects($this->once())
-            ->method('setCompletedAt')
-            ->with($this->isInstanceOf(\DateTimeImmutable::class));
-
-        $this->entityManager->expects($this->once())
-            ->method('flush');
-
-        $this->eventDispatcher->expects($this->once())
-            ->method('dispatch')
-            ->with($this->isInstanceOf(ProgressCompletedEvent::class), 'progress.completed');
-
-        $result = $this->progressService->updateProgressStatus(1, 'complete');
-
-        $this->assertSame($progress, $result);
-    }
-
-    public function testUpdateProgressStatusNotFound(): void
-    {
-        $this->entityManager->expects($this->once())
-            ->method('find')
-            ->with(Progress::class, 999)
-            ->willReturn(null);
-
-        $this->expectException(ProgressNotFoundException::class);
-
-        $this->progressService->updateProgressStatus(999, 'complete');
-    }
-
-    public function testUpdateProgressStatusInvalidTransition(): void
-    {
-        $progress = $this->createMock(Progress::class);
-        $currentStatus = ProgressStatus::COMPLETE;
-
-        $this->entityManager->expects($this->once())
-            ->method('find')
-            ->with(Progress::class, 1)
-            ->willReturn($progress);
-
-        $progress->expects($this->once())
-            ->method('getStatus')
-            ->willReturn($currentStatus);
-
-        $this->expectException(InvalidStatusTransitionException::class);
-
-        $this->progressService->updateProgressStatus(1, 'pending');
-    }
 
     public function testGetUserProgressSuccess(): void
     {
@@ -360,29 +295,5 @@ class ProgressServiceTest extends TestCase
         $this->progressService->getUserProgress(999, 1);
     }
 
-    public function testGetProgressByRequestId(): void
-    {
-        $expectedProgress = $this->createMock(Progress::class);
 
-        $this->progressRepository->expects($this->once())
-            ->method('findByRequestId')
-            ->with('test-request-123')
-            ->willReturn($expectedProgress);
-
-        $result = $this->progressService->getProgressByRequestId('test-request-123');
-
-        $this->assertSame($expectedProgress, $result);
-    }
-
-    public function testGetProgressByRequestIdNotFound(): void
-    {
-        $this->progressRepository->expects($this->once())
-            ->method('findByRequestId')
-            ->with('non-existent')
-            ->willReturn(null);
-
-        $result = $this->progressService->getProgressByRequestId('non-existent');
-
-        $this->assertNull($result);
-    }
 }
