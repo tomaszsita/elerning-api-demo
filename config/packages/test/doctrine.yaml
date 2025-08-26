@@ -1,0 +1,4 @@
+doctrine:
+    dbal:
+        # Disable dbname_suffix for test environment
+        dbname_suffix: null
