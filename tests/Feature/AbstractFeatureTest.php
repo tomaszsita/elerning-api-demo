@@ -20,8 +20,8 @@ abstract class AbstractFeatureTest extends WebTestCase
         $this->container = static::getContainer();
         $this->entityManager = $this->container->get(EntityManagerInterface::class);
         
-        // Start transaction
-        $this->entityManager->beginTransaction();
+        // Clean up database before each test
+        $this->cleanupDatabase();
         
         // Load test data
         $this->loadTestData();
@@ -29,13 +29,7 @@ abstract class AbstractFeatureTest extends WebTestCase
 
     protected function tearDown(): void
     {
-        // Rollback transaction
-        if ($this->entityManager->isOpen()) {
-            $this->entityManager->rollback();
-        }
-        
-        // Reset client
-        $this->client = null;
+        parent::tearDown();
     }
 
     protected function loadTestData(): void
@@ -76,6 +70,19 @@ abstract class AbstractFeatureTest extends WebTestCase
 
     protected function getTestLesson(): Lesson
     {
-        return $this->entityManager->getRepository(Lesson::class)->findOneBy(['title' => 'Test Lesson']);
+        $lesson = $this->entityManager->getRepository(Lesson::class)->findOneBy(['title' => 'Test Lesson']);
+        return $lesson;
+    }
+
+    private function cleanupDatabase(): void
+    {
+        // Delete all data in reverse order of dependencies
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Progress')->execute();
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Enrollment')->execute();
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Lesson')->execute();
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Course')->execute();
+        $this->entityManager->createQuery('DELETE FROM App\Entity\User')->execute();
+        
+        $this->entityManager->flush();
     }
 }

@@ -46,8 +46,17 @@ class ProgressControllerTest extends AbstractFeatureTest
     public function testCreateProgressIdempotency(): void
     {
         $user = $this->getTestUser();
+        $course = $this->getTestCourse();
         $lesson = $this->getTestLesson();
         $requestId = 'idempotency-test-123';
+
+        // First enroll user in course
+        $this->client->request('POST', '/enrollments', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'user_id' => $user->getId(),
+            'course_id' => $course->getId(),
+        ]));
 
         // First request
         $this->client->request('POST', '/progress', [], [], [
@@ -151,6 +160,14 @@ class ProgressControllerTest extends AbstractFeatureTest
         $user = $this->getTestUser();
         $course = $this->getTestCourse();
         $lesson = $this->getTestLesson();
+
+        // First enroll user in course
+        $this->client->request('POST', '/enrollments', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'user_id' => $user->getId(),
+            'course_id' => $course->getId(),
+        ]));
 
         // First create a progress
         $this->client->request('POST', '/progress', [], [], [
