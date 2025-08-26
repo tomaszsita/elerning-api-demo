@@ -54,6 +54,9 @@ class LoadTestDataCommand extends Command
         }
     }
 
+    /**
+     * @return User[]
+     */
     private function createUsers(SymfonyStyle $io): array
     {
         $io->section('Creating users...');
@@ -80,6 +83,9 @@ class LoadTestDataCommand extends Command
         return $users;
     }
 
+    /**
+     * @return Course[]
+     */
     private function createCourses(SymfonyStyle $io): array
     {
         $io->section('Creating courses with lessons...');

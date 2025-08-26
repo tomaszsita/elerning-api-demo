@@ -74,6 +74,9 @@ class EnrollmentService
         }
     }
 
+    /**
+     * @return Enrollment[]
+     */
     public function getUserEnrollments(int $userId): array
     {
         $user = $this->userRepository->find($userId);

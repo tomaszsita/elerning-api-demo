@@ -23,6 +23,9 @@ class ProgressRepository extends ServiceEntityRepository implements ProgressRepo
         parent::__construct($registry, Progress::class);
     }
 
+    /**
+     * @return Progress[]
+     */
     public function findByUserAndCourse(int $userId, int $courseId): array
     {
         return $this->createQueryBuilder('p')

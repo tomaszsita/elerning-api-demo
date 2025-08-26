@@ -17,6 +17,9 @@ enum ProgressStatus: string
         };
     }
 
+    /**
+     * @return array<int, ProgressStatus>
+     */
     public static function getAllowedTransitions(self $status): array
     {
         return match ($status) {

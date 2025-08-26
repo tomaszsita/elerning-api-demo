@@ -6,6 +6,9 @@ use App\Entity\Progress;
 
 interface ProgressRepositoryInterface
 {
+    /**
+     * @return Progress[]
+     */
     public function findByUserAndCourse(int $userId, int $courseId): array;
     public function findByRequestId(string $requestId): ?Progress;
     public function findByUserAndLesson(int $userId, int $lessonId): ?Progress;

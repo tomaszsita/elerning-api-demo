@@ -35,6 +35,9 @@ class EnrollmentRepository extends ServiceEntityRepository implements Enrollment
             ->getSingleScalarResult() > 0;
     }
 
+    /**
+     * @return Enrollment[]
+     */
     public function findByUser(int $userId): array
     {
         return $this->createQueryBuilder('e')

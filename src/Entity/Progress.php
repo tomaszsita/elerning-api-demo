@@ -107,6 +107,9 @@ class Progress implements \JsonSerializable
         return \App\Enum\ProgressStatus::canTransition($this->status, \App\Enum\ProgressStatus::fromString($newStatus));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
@@ -120,6 +123,9 @@ class Progress implements \JsonSerializable
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return $this->toArray();

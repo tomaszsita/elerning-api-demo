@@ -53,6 +53,9 @@ class ProgressService
         return $progress;
     }
 
+    /**
+     * @return Progress[]
+     */
     public function getUserProgress(int $userId, int $courseId): array
     {
         $this->validateAndGetUser($userId);
