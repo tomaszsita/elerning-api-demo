@@ -59,12 +59,17 @@ class ProgressStatusTest extends TestCase
         $this->assertFalse(ProgressStatus::isFinal(ProgressStatus::FAILED));
     }
 
-    public function testIsValid(): void
+    public function testFromString(): void
     {
-        $this->assertTrue(ProgressStatus::isValid(ProgressStatus::PENDING));
-        $this->assertTrue(ProgressStatus::isValid(ProgressStatus::COMPLETE));
-        $this->assertTrue(ProgressStatus::isValid(ProgressStatus::FAILED));
-        $this->assertFalse(ProgressStatus::isValid('invalid_status'));
+        $this->assertEquals(ProgressStatus::PENDING, ProgressStatus::fromString('pending'));
+        $this->assertEquals(ProgressStatus::COMPLETE, ProgressStatus::fromString('complete'));
+        $this->assertEquals(ProgressStatus::FAILED, ProgressStatus::fromString('failed'));
+    }
+
+    public function testFromStringInvalid(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        ProgressStatus::fromString('invalid_status');
     }
 
 

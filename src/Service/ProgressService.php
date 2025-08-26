@@ -40,7 +40,7 @@ class ProgressService
     private EnrollmentService $enrollmentService;
     private EventDispatcherInterface $eventDispatcher;
 
-    public function createProgress(int $userId, int $lessonId, string $requestId, string $status = ProgressStatus::COMPLETE): Progress
+    public function createProgress(int $userId, int $lessonId, string $requestId, string $status = 'complete'): Progress
     {
         // IDEMPOTENCY: Sprawdź czy już istnieje progress z tym request_id
         $existingProgress = $this->progressRepository->findByRequestId($requestId);
@@ -66,7 +66,9 @@ class ProgressService
         }
 
         // Sprawdź czy status jest prawidłowy
-        if (!ProgressStatus::isValid($status)) {
+        try {
+            $progressStatus = ProgressStatus::fromString($status);
+        } catch (\InvalidArgumentException $e) {
             throw new InvalidStatusTransitionException('', $status);
         }
 
@@ -77,7 +79,7 @@ class ProgressService
         $progress->setRequestId($requestId);
         $progress->setStatus($status);
 
-        if ($status === ProgressStatus::COMPLETE) {
+        if ($status === 'complete') {
             $progress->setCompletedAt(new \DateTimeImmutable());
         }
 
@@ -85,7 +87,7 @@ class ProgressService
         $this->entityManager->flush();
 
         // Wyślij event
-        if ($status === ProgressStatus::COMPLETE) {
+        if ($status === 'complete') {
             $this->eventDispatcher->dispatch(
                 new \App\Event\ProgressCompletedEvent($progress),
                 'progress.completed'
@@ -112,14 +114,14 @@ class ProgressService
         // Aktualizuj status
         $progress->setStatus($newStatus);
 
-        if ($newStatus === ProgressStatus::COMPLETE) {
+        if ($newStatus === 'complete') {
             $progress->setCompletedAt(new \DateTimeImmutable());
         }
 
         $this->entityManager->flush();
 
         // Wyślij event
-        if ($newStatus === ProgressStatus::COMPLETE) {
+        if ($newStatus === 'complete') {
             $this->eventDispatcher->dispatch(
                 new \App\Event\ProgressCompletedEvent($progress),
                 'progress.completed'

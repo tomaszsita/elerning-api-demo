@@ -2,53 +2,42 @@
 
 namespace App\Enum;
 
-class ProgressStatus
+enum ProgressStatus: string
 {
-    public const PENDING = 'pending';
-    public const COMPLETE = 'complete';
-    public const FAILED = 'failed';
+    case PENDING = 'pending';
+    case COMPLETE = 'complete';
+    case FAILED = 'failed';
 
-    public static function canTransition(string $fromStatus, string $toStatus): bool
+    public static function canTransition(self $fromStatus, self $toStatus): bool
     {
-        if ($fromStatus === self::PENDING) {
-            return in_array($toStatus, [self::COMPLETE, self::FAILED]);
-        }
-        
-        if ($fromStatus === self::FAILED) {
-            return $toStatus === self::COMPLETE;
-        }
-        
-        if ($fromStatus === self::COMPLETE) {
-            return false; // Nie można zmienić z complete
-        }
-        
-        return false;
+        return match ($fromStatus) {
+            self::PENDING => in_array($toStatus, [self::COMPLETE, self::FAILED]),
+            self::FAILED => $toStatus === self::COMPLETE,
+            self::COMPLETE => false, // Nie można zmienić z complete
+        };
     }
 
-    public static function getAllowedTransitions(string $status): array
+    public static function getAllowedTransitions(self $status): array
     {
-        if ($status === self::PENDING) {
-            return [self::COMPLETE, self::FAILED];
-        }
-        
-        if ($status === self::FAILED) {
-            return [self::COMPLETE];
-        }
-        
-        if ($status === self::COMPLETE) {
-            return [];
-        }
-        
-        return [];
+        return match ($status) {
+            self::PENDING => [self::COMPLETE, self::FAILED],
+            self::FAILED => [self::COMPLETE],
+            self::COMPLETE => [],
+        };
     }
 
-    public static function isFinal(string $status): bool
+    public static function isFinal(self $status): bool
     {
         return $status === self::COMPLETE;
     }
 
-    public static function isValid(string $status): bool
+    public static function fromString(string $value): self
     {
-        return in_array($status, [self::PENDING, self::COMPLETE, self::FAILED]);
+        return match ($value) {
+            'pending' => self::PENDING,
+            'complete' => self::COMPLETE,
+            'failed' => self::FAILED,
+            default => throw new \InvalidArgumentException("Invalid status: {$value}"),
+        };
     }
 }
