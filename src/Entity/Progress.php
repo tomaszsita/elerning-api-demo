@@ -18,6 +18,9 @@ class Progress
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $completedAt = null;
 
+    #[ORM\Column(length: 20)]
+    private ?string $status = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $requestId = null;
 
@@ -31,6 +34,7 @@ class Progress
 
     public function __construct()
     {
+        $this->status = \App\Enum\ProgressStatus::PENDING;
     }
 
     public function getId(): ?int
@@ -82,8 +86,24 @@ class Progress
         return $this;
     }
 
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
+        return $this;
+    }
+
     public function isCompleted(): bool
     {
-        return $this->completedAt !== null;
+        return $this->status === \App\Enum\ProgressStatus::COMPLETE;
+    }
+
+    public function canTransitionTo(string $newStatus): bool
+    {
+        return \App\Enum\ProgressStatus::canTransition($this->status, $newStatus);
     }
 }
