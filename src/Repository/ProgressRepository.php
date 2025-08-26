@@ -46,4 +46,12 @@ class ProgressRepository extends ServiceEntityRepository
         $this->_em->persist($progress);
         $this->_em->flush();
     }
+
+    public function findByUserAndLesson(int $userId, int $lessonId): ?Progress
+    {
+        return $this->findOneBy([
+            'user' => $userId,
+            'lesson' => $lessonId
+        ]);
+    }
 }

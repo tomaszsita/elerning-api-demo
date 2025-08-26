@@ -27,4 +27,16 @@ class LessonRepository extends ServiceEntityRepository
         $this->_em->persist($lesson);
         $this->_em->flush();
     }
+
+    public function findByCourseAndOrderLessThan(int $courseId, int $orderIndex): array
+    {
+        return $this->createQueryBuilder('l')
+            ->where('l.course = :courseId')
+            ->andWhere('l.orderIndex < :orderIndex')
+            ->setParameter('courseId', $courseId)
+            ->setParameter('orderIndex', $orderIndex)
+            ->orderBy('l.orderIndex', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }
