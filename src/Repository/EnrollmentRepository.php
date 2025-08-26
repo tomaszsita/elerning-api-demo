@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Repository;
+
+use App\Entity\Enrollment;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * @extends ServiceEntityRepository<Enrollment>
+ *
+ * @method Enrollment|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Enrollment|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Enrollment[]    findAll()
+ * @method Enrollment[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
+class EnrollmentRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Enrollment::class);
+    }
+
+    public function existsByUserAndCourse(int $userId, int $courseId): bool
+    {
+        return $this->createQueryBuilder('e')
+            ->select('COUNT(e.id)')
+            ->where('e.user = :userId')
+            ->andWhere('e.course = :courseId')
+            ->setParameter('userId', $userId)
+            ->setParameter('courseId', $courseId)
+            ->getQuery()
+            ->getSingleScalarResult() > 0;
+    }
+
+    public function findByUser(int $userId): array
+    {
+        return $this->createQueryBuilder('e')
+            ->leftJoin('e.course', 'c')
+            ->addSelect('c')
+            ->where('e.user = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getResult();
+    }
+}
