@@ -30,3 +30,8 @@
 ehthumbs.db
 Thumbs.db
 ###< OS generated files ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###
