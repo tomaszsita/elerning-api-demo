@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ProgressRepository::class)]
 #[ORM\Table(name: 'progress')]
 #[ORM\UniqueConstraint(name: 'unique_user_lesson', columns: ['user_id', 'lesson_id'])]
-class Progress
+class Progress implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -105,5 +105,23 @@ class Progress
     public function canTransitionTo(string $newStatus): bool
     {
         return \App\Enum\ProgressStatus::canTransition($this->status, $newStatus);
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'user_id' => $this->getUser() ? $this->getUser()->getId() : null,
+            'lesson_id' => $this->getLesson() ? $this->getLesson()->getId() : null,
+            'lesson_title' => $this->getLesson() ? $this->getLesson()->getTitle() : null,
+            'status' => $this->getStatus() ? $this->getStatus()->value : null,
+            'request_id' => $this->getRequestId(),
+            'completed_at' => $this->getCompletedAt() ? $this->getCompletedAt()->format('Y-m-d H:i:s') : null,
+        ];
+    }
+
+    public function jsonSerialize(): array
+    {
+        return $this->toArray();
     }
 }

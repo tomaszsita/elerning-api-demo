@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: EnrollmentRepository::class)]
 #[ORM\Table(name: 'enrollments')]
 #[ORM\UniqueConstraint(name: 'unique_user_course', columns: ['user_id', 'course_id'])]
-class Enrollment
+class Enrollment implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -98,5 +98,23 @@ class Enrollment
     {
         $this->course = $course;
         return $this;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'user_id' => $this->getUser() ? $this->getUser()->getId() : null,
+            'course_id' => $this->getCourse() ? $this->getCourse()->getId() : null,
+            'course_title' => $this->getCourse() ? $this->getCourse()->getTitle() : null,
+            'status' => $this->getStatus(),
+            'enrolled_at' => $this->getEnrolledAt() ? $this->getEnrolledAt()->format('Y-m-d H:i:s') : null,
+            'completed_at' => $this->getCompletedAt() ? $this->getCompletedAt()->format('Y-m-d H:i:s') : null,
+        ];
+    }
+
+    public function jsonSerialize(): array
+    {
+        return $this->toArray();
     }
 }

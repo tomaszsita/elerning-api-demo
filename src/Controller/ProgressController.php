@@ -81,17 +81,7 @@ class ProgressController
 
         $progressList = $this->progressService->getUserProgress((int) $userId, (int) $courseId);
 
-        $progressData = array_map(function ($progress) {
-            return [
-                'id' => $progress->getId(),
-                'user_id' => $progress->getUser()->getId(),
-                'lesson_id' => $progress->getLesson()->getId(),
-                'lesson_title' => $progress->getLesson()->getTitle(),
-                'status' => $progress->getStatus(),
-                'request_id' => $progress->getRequestId(),
-                'completed_at' => $progress->getCompletedAt() ? $progress->getCompletedAt()->format('Y-m-d H:i:s') : null
-            ];
-        }, $progressList);
+                    $progressData = array_map(fn($progress) => $progress->toArray(), $progressList);
 
         return new JsonResponse(['progress' => $progressData], Response::HTTP_OK);
     }

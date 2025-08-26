@@ -73,17 +73,7 @@ class EnrollmentController
 
         $enrollments = $this->enrollmentService->getUserEnrollments((int) $userId);
 
-        $enrollmentsData = array_map(function ($enrollment) {
-            return [
-                'id' => $enrollment->getId(),
-                'user_id' => $enrollment->getUser()->getId(),
-                'course_id' => $enrollment->getCourse()->getId(),
-                'course_title' => $enrollment->getCourse()->getTitle(),
-                'status' => $enrollment->getStatus(),
-                'enrolled_at' => $enrollment->getEnrolledAt()->format('Y-m-d H:i:s'),
-                'completed_at' => $enrollment->getCompletedAt() ? $enrollment->getCompletedAt()->format('Y-m-d H:i:s') : null
-            ];
-        }, $enrollments);
+        $enrollmentsData = array_map(fn($enrollment) => $enrollment->toArray(), $enrollments);
 
         return new JsonResponse(['enrollments' => $enrollmentsData], Response::HTTP_OK);
     }

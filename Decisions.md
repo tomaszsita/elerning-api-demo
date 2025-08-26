@@ -32,6 +32,21 @@
 
 **Implementation:** `src/Request/` with `*Request` classes
 
+### 3.1. Response Serialization
+**Decision:** Use JsonSerializable interface for entity serialization
+**Rationale:**
+- Clean controller code (no manual array mapping)
+- Reusable serialization logic
+- Consistent response format
+- Easy testing and maintenance
+
+**Implementation:** `toArray()` method in entities + `JsonSerializable` interface
+
+**Potential Improvements:**
+- **Response DTOs:** Create dedicated response objects for better API versioning and documentation
+- **Serializer Component:** Use Symfony Serializer for more advanced serialization features (groups, normalization, etc.)
+- **API Resources:** Implement Laravel-style API resources for complex response transformations
+
 ### 4. Value Objects
 **Decision:** Create Value Objects for domain concepts
 **Rationale:**
