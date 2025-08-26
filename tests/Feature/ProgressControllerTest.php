@@ -14,7 +14,6 @@ class ProgressControllerTest extends AbstractFeatureTest
         $course = $this->getTestCourse();
         $lesson = $this->getTestLesson();
 
-        // First enroll user in course
         $this->client->request('POST', '/enrollments', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
@@ -22,7 +21,6 @@ class ProgressControllerTest extends AbstractFeatureTest
             'course_id' => $course->getId(),
         ]));
 
-        // Then create progress
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
@@ -50,7 +48,6 @@ class ProgressControllerTest extends AbstractFeatureTest
         $lesson = $this->getTestLesson();
         $requestId = 'idempotency-test-123';
 
-        // First enroll user in course
         $this->client->request('POST', '/enrollments', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
@@ -58,7 +55,6 @@ class ProgressControllerTest extends AbstractFeatureTest
             'course_id' => $course->getId(),
         ]));
 
-        // First request
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
@@ -70,7 +66,7 @@ class ProgressControllerTest extends AbstractFeatureTest
         $this->assertResponseStatusCodeSame(201);
         $firstResponse = json_decode($this->client->getResponse()->getContent(), true);
 
-        // Second request with same request_id
+
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
@@ -82,7 +78,7 @@ class ProgressControllerTest extends AbstractFeatureTest
         $this->assertResponseStatusCodeSame(201);
         $secondResponse = json_decode($this->client->getResponse()->getContent(), true);
 
-        // Should return the same progress record
+
         $this->assertEquals($firstResponse['id'], $secondResponse['id']);
         $this->assertEquals($firstResponse['request_id'], $secondResponse['request_id']);
     }
@@ -105,9 +101,9 @@ class ProgressControllerTest extends AbstractFeatureTest
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => 0, // Invalid - must be positive
-            'lesson_id' => -1, // Invalid - must be positive
-            'request_id' => '', // Invalid - must not be blank
+            'user_id' => 0,
+            'lesson_id' => -1,
+            'request_id' => '',
         ]));
 
         $this->assertResponseStatusCodeSame(400);
@@ -124,7 +120,7 @@ class ProgressControllerTest extends AbstractFeatureTest
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => 99999, // Non-existent user
+            'user_id' => 99999,
             'lesson_id' => $lesson->getId(),
             'request_id' => 'test-request-123',
         ]));
@@ -144,7 +140,7 @@ class ProgressControllerTest extends AbstractFeatureTest
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
             'user_id' => $user->getId(),
-            'lesson_id' => 99999, // Non-existent lesson
+            'lesson_id' => 99999,
             'request_id' => 'test-request-123',
         ]));
 
@@ -161,7 +157,6 @@ class ProgressControllerTest extends AbstractFeatureTest
         $course = $this->getTestCourse();
         $lesson = $this->getTestLesson();
 
-        // First enroll user in course
         $this->client->request('POST', '/enrollments', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
@@ -169,7 +164,6 @@ class ProgressControllerTest extends AbstractFeatureTest
             'course_id' => $course->getId(),
         ]));
 
-        // First create a progress
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
@@ -178,7 +172,7 @@ class ProgressControllerTest extends AbstractFeatureTest
             'request_id' => 'test-request-456',
         ]));
 
-        // Then get user progress
+
         $this->client->request('GET', '/progress?user_id=' . $user->getId() . '&course_id=' . $course->getId());
 
         $this->assertResponseStatusCodeSame(200);

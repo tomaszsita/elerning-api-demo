@@ -47,8 +47,8 @@ class EnrollmentControllerTest extends AbstractFeatureTest
         $this->client->request('POST', '/enrollments', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => 0, // Invalid - must be positive
-            'course_id' => -1, // Invalid - must be positive
+            'user_id' => 0,
+            'course_id' => -1,
         ]));
 
         $this->assertResponseStatusCodeSame(400);
@@ -65,7 +65,7 @@ class EnrollmentControllerTest extends AbstractFeatureTest
         $this->client->request('POST', '/enrollments', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => 99999, // Non-existent user
+            'user_id' => 99999,
             'course_id' => $course->getId(),
         ]));
 
@@ -84,7 +84,7 @@ class EnrollmentControllerTest extends AbstractFeatureTest
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
             'user_id' => $user->getId(),
-            'course_id' => 99999, // Non-existent course
+            'course_id' => 99999,
         ]));
 
         $this->assertResponseStatusCodeSame(404);
@@ -99,7 +99,6 @@ class EnrollmentControllerTest extends AbstractFeatureTest
         $user = $this->getTestUser();
         $course = $this->getTestCourse();
 
-        // First create an enrollment
         $this->client->request('POST', '/enrollments', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
@@ -107,7 +106,7 @@ class EnrollmentControllerTest extends AbstractFeatureTest
             'course_id' => $course->getId(),
         ]));
 
-        // Then get user enrollments
+        $this->client->request('GET', '/enrollments?user_id=' . $user->getId());
         $this->client->request('GET', '/enrollments?user_id=' . $user->getId());
 
         $this->assertResponseStatusCodeSame(200);

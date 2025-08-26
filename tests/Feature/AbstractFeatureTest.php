@@ -20,10 +20,7 @@ abstract class AbstractFeatureTest extends WebTestCase
         $this->container = static::getContainer();
         $this->entityManager = $this->container->get(EntityManagerInterface::class);
         
-        // Clean up database before each test
         $this->cleanupDatabase();
-        
-        // Load test data
         $this->loadTestData();
     }
 
@@ -34,20 +31,17 @@ abstract class AbstractFeatureTest extends WebTestCase
 
     protected function loadTestData(): void
     {
-        // Create test user
         $user = new User();
         $user->setName('Test User');
         $user->setEmail('test@example.com');
         $this->entityManager->persist($user);
 
-        // Create test course
         $course = new Course();
         $course->setTitle('Test Course');
         $course->setDescription('Test course description');
         $course->setMaxSeats(10);
         $this->entityManager->persist($course);
 
-        // Create test lesson
         $lesson = new Lesson();
         $lesson->setTitle('Test Lesson');
         $lesson->setContent('Test lesson content');
@@ -76,7 +70,6 @@ abstract class AbstractFeatureTest extends WebTestCase
 
     private function cleanupDatabase(): void
     {
-        // Delete all data in reverse order of dependencies
         $this->entityManager->createQuery('DELETE FROM App\Entity\Progress')->execute();
         $this->entityManager->createQuery('DELETE FROM App\Entity\Enrollment')->execute();
         $this->entityManager->createQuery('DELETE FROM App\Entity\Lesson')->execute();
