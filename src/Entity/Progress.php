@@ -18,8 +18,8 @@ class Progress
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $completedAt = null;
 
-    #[ORM\Column(length: 20)]
-    private ?string $status = null;
+    #[ORM\Column(length: 20, enumType: \App\Enum\ProgressStatus::class)]
+    private ?\App\Enum\ProgressStatus $status = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $requestId = null;
@@ -86,12 +86,12 @@ class Progress
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): ?\App\Enum\ProgressStatus
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): self
+    public function setStatus(\App\Enum\ProgressStatus $status): self
     {
         $this->status = $status;
         return $this;

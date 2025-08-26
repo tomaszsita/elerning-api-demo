@@ -13,7 +13,7 @@ enum ProgressStatus: string
         return match ($fromStatus) {
             self::PENDING => in_array($toStatus, [self::COMPLETE, self::FAILED]),
             self::FAILED => $toStatus === self::COMPLETE,
-            self::COMPLETE => false, // Nie można zmienić z complete
+            self::COMPLETE => false, // Cannot change from complete
         };
     }
 

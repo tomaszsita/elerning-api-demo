@@ -13,7 +13,7 @@ class ExceptionListener
     {
         $exception = $event->getThrowable();
         
-        // Jeśli to już HttpException, nie zmieniaj
+        // If it's already an HttpException, don't change it
         if ($exception instanceof HttpExceptionInterface) {
             return;
         }

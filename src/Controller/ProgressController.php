@@ -66,7 +66,7 @@ class ProgressController
             ], Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
-            // Exception mapping będzie obsługiwane przez ExceptionListener
+            // Exception mapping will be handled by ExceptionListener
             throw $e;
         }
     }
@@ -103,7 +103,7 @@ class ProgressController
             return new JsonResponse(['progress' => $progressData], Response::HTTP_OK);
 
         } catch (\Exception $e) {
-            // Exception mapping będzie obsługiwane przez ExceptionListener
+            // Exception mapping will be handled by ExceptionListener
             throw $e;
         }
     }
