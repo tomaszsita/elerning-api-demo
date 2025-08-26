@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Enrollment;
+use App\Repository\Interfaces\EnrollmentRepositoryInterface;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -15,7 +16,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Enrollment[]    findAll()
  * @method Enrollment[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class EnrollmentRepository extends ServiceEntityRepository
+class EnrollmentRepository extends ServiceEntityRepository implements EnrollmentRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

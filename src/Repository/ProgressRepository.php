@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Progress;
+use App\Repository\Interfaces\ProgressRepositoryInterface;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -15,7 +16,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Progress[]    findAll()
  * @method Progress[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ProgressRepository extends ServiceEntityRepository
+class ProgressRepository extends ServiceEntityRepository implements ProgressRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

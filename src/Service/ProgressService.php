@@ -10,9 +10,9 @@ use App\Exception\InvalidStatusTransitionException;
 use App\Exception\UserNotFoundException;
 use App\Exception\LessonNotFoundException;
 use App\Exception\PrerequisitesNotMetException;
-use App\Repository\UserRepository;
-use App\Repository\LessonRepository;
-use App\Repository\ProgressRepository;
+use App\Repository\Interfaces\UserRepositoryInterface;
+use App\Repository\Interfaces\LessonRepositoryInterface;
+use App\Repository\Interfaces\ProgressRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -20,9 +20,9 @@ class ProgressService
 {
     public function __construct(
         EntityManagerInterface $entityManager,
-        UserRepository $userRepository,
-        LessonRepository $lessonRepository,
-        ProgressRepository $progressRepository,
+        UserRepositoryInterface $userRepository,
+        LessonRepositoryInterface $lessonRepository,
+        ProgressRepositoryInterface $progressRepository,
         EventDispatcherInterface $eventDispatcher
     ) {
         $this->entityManager = $entityManager;
@@ -30,14 +30,12 @@ class ProgressService
         $this->lessonRepository = $lessonRepository;
         $this->progressRepository = $progressRepository;
         $this->eventDispatcher = $eventDispatcher;
-        
-
     }
 
     private EntityManagerInterface $entityManager;
-    private UserRepository $userRepository;
-    private LessonRepository $lessonRepository;
-    private ProgressRepository $progressRepository;
+    private UserRepositoryInterface $userRepository;
+    private LessonRepositoryInterface $lessonRepository;
+    private ProgressRepositoryInterface $progressRepository;
     private EventDispatcherInterface $eventDispatcher;
 
     public function createProgress(int $userId, int $lessonId, string $requestId, string $status = 'complete'): Progress

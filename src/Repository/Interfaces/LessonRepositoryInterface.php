@@ -6,6 +6,6 @@ use App\Entity\Lesson;
 
 interface LessonRepositoryInterface
 {
-    public function find(mixed $id, $lockMode = null, ?int $lockVersion = null): ?object;
+    public function findByCourseAndOrderLessThan(int $courseId, int $orderIndex): array;
     public function save(Lesson $lesson): void;
 }

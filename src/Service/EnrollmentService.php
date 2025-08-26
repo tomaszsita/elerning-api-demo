@@ -9,9 +9,9 @@ use App\Exception\CourseFullException;
 use App\Exception\UserAlreadyEnrolledException;
 use App\Exception\UserNotFoundException;
 use App\Exception\CourseNotFoundException;
-use App\Repository\UserRepository;
-use App\Repository\CourseRepository;
-use App\Repository\EnrollmentRepository;
+use App\Repository\Interfaces\UserRepositoryInterface;
+use App\Repository\Interfaces\CourseRepositoryInterface;
+use App\Repository\Interfaces\EnrollmentRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -19,9 +19,9 @@ class EnrollmentService
 {
     public function __construct(
         EntityManagerInterface $entityManager,
-        UserRepository $userRepository,
-        CourseRepository $courseRepository,
-        EnrollmentRepository $enrollmentRepository,
+        UserRepositoryInterface $userRepository,
+        CourseRepositoryInterface $courseRepository,
+        EnrollmentRepositoryInterface $enrollmentRepository,
         EventDispatcherInterface $eventDispatcher
     ) {
         $this->entityManager = $entityManager;
@@ -29,14 +29,12 @@ class EnrollmentService
         $this->courseRepository = $courseRepository;
         $this->enrollmentRepository = $enrollmentRepository;
         $this->eventDispatcher = $eventDispatcher;
-        
-
     }
 
     private EntityManagerInterface $entityManager;
-    private UserRepository $userRepository;
-    private CourseRepository $courseRepository;
-    private EnrollmentRepository $enrollmentRepository;
+    private UserRepositoryInterface $userRepository;
+    private CourseRepositoryInterface $courseRepository;
+    private EnrollmentRepositoryInterface $enrollmentRepository;
     private EventDispatcherInterface $eventDispatcher;
 
     public function enrollUser(int $userId, int $courseId): Enrollment

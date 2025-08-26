@@ -24,6 +24,18 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
+    # Repository interfaces mapping
+    App\Repository\Interfaces\UserRepositoryInterface:
+        alias: App\Repository\UserRepository
+    App\Repository\Interfaces\CourseRepositoryInterface:
+        alias: App\Repository\CourseRepository
+    App\Repository\Interfaces\EnrollmentRepositoryInterface:
+        alias: App\Repository\EnrollmentRepository
+    App\Repository\Interfaces\LessonRepositoryInterface:
+        alias: App\Repository\LessonRepository
+    App\Repository\Interfaces\ProgressRepositoryInterface:
+        alias: App\Repository\ProgressRepository
+
     # Controllers
     App\Controller\:
         resource: '../src/Controller/'

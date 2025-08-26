@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Lesson;
+use App\Repository\Interfaces\LessonRepositoryInterface;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -15,7 +16,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Lesson[]    findAll()
  * @method Lesson[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class LessonRepository extends ServiceEntityRepository
+class LessonRepository extends ServiceEntityRepository implements LessonRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
