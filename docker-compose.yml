@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: pwc_elearning_app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - pwc_elearning
+
+  nginx:
+    image: nginx:alpine
+    container_name: pwc_elearning_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - pwc_elearning
+
+  db:
+    image: postgres:15-alpine
+    container_name: pwc_elearning_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: elearning
+      POSTGRES_USER: elearning_user
+      POSTGRES_PASSWORD: elearning_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    networks:
+      - pwc_elearning
+
+networks:
+  pwc_elearning:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
