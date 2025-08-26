@@ -6,17 +6,17 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class CreateEnrollmentRequest
 {
-    public function __construct(
-        #[Assert\Positive]
-        int $userId,
+    #[Assert\Positive]
+    public int $userId;
 
-        #[Assert\Positive]
+    #[Assert\Positive]
+    public int $courseId;
+
+    public function __construct(
+        int $userId,
         int $courseId
     ) {
         $this->userId = $userId;
         $this->courseId = $courseId;
     }
-
-    public int $userId;
-    public int $courseId;
 }
