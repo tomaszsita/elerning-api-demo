@@ -6,6 +6,8 @@ use InvalidArgumentException;
 
 class Email
 {
+    private string $value;
+    
     private function __construct(string $value)
     {
         $this->value = $value;

@@ -47,8 +47,8 @@ class ProgressRepository extends ServiceEntityRepository implements ProgressRepo
 
     public function save(Progress $progress): void
     {
-        $this->_em->persist($progress);
-        $this->_em->flush();
+        $this->getEntityManager()->persist($progress);
+        $this->getEntityManager()->flush();
     }
 
     public function findByUserAndLesson(int $userId, int $lessonId): ?Progress

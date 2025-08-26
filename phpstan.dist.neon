@@ -4,3 +4,8 @@ parameters:
         - src/
     excludePaths:
         - tests/
+    ignoreErrors:
+        # Entity ID properties - these are Doctrine generated and never assigned int
+        - '#Property .*Entity.*::\$id \(int\|null\) is never assigned int so it can be removed from the property type#'
+        # Doctrine collections - PHPStan doesn't see our PHPDoc annotations
+        - '#Property .* with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types#'

@@ -25,8 +25,8 @@ class LessonRepository extends ServiceEntityRepository implements LessonReposito
 
     public function save(Lesson $lesson): void
     {
-        $this->_em->persist($lesson);
-        $this->_em->flush();
+        $this->getEntityManager()->persist($lesson);
+        $this->getEntityManager()->flush();
     }
 
     /**

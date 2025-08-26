@@ -36,7 +36,7 @@ class CourseRepository extends ServiceEntityRepository implements CourseReposito
 
     public function save(Course $course): void
     {
-        $this->_em->persist($course);
-        $this->_em->flush();
+        $this->getEntityManager()->persist($course);
+        $this->getEntityManager()->flush();
     }
 }

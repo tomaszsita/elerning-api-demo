@@ -51,7 +51,7 @@ class EnrollmentRepository extends ServiceEntityRepository implements Enrollment
 
     public function save(Enrollment $enrollment): void
     {
-        $this->_em->persist($enrollment);
-        $this->_em->flush();
+        $this->getEntityManager()->persist($enrollment);
+        $this->getEntityManager()->flush();
     }
 }

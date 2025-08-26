@@ -36,9 +36,11 @@ class Course
 
     #[ORM\OneToMany(mappedBy: 'course', targetEntity: Lesson::class, orphanRemoval: true)]
     #[ORM\OrderBy(['orderIndex' => 'ASC'])]
+    /** @var Collection<int, Lesson> */
     private Collection $lessons;
 
     #[ORM\OneToMany(mappedBy: 'course', targetEntity: Enrollment::class, orphanRemoval: true)]
+    /** @var Collection<int, Enrollment> */
     private Collection $enrollments;
 
     public function __construct()

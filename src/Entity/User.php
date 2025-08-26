@@ -31,9 +31,11 @@ class User
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Enrollment::class, orphanRemoval: true)]
+    /** @var Collection<int, Enrollment> */
     private Collection $enrollments;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Progress::class, orphanRemoval: true)]
+    /** @var Collection<int, Progress> */
     private Collection $progresses;
 
     public function __construct()

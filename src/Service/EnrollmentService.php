@@ -17,29 +17,26 @@ class EnrollmentService
 {
     public function __construct(
         EntityManagerInterface $entityManager,
-        UserRepositoryInterface $userRepository,
         CourseRepositoryInterface $courseRepository,
         EnrollmentRepositoryInterface $enrollmentRepository
     ) {
         $this->entityManager = $entityManager;
-        $this->userRepository = $userRepository;
         $this->courseRepository = $courseRepository;
         $this->enrollmentRepository = $enrollmentRepository;
     }
 
     private EntityManagerInterface $entityManager;
-    private UserRepositoryInterface $userRepository;
     private CourseRepositoryInterface $courseRepository;
     private EnrollmentRepositoryInterface $enrollmentRepository;
 
     public function enrollUser(int $userId, int $courseId): Enrollment
     {
-        $user = $this->userRepository->find($userId);
+        $user = $this->entityManager->find(User::class, $userId);
         if (!$user) {
             throw new UserNotFoundException($userId);
         }
 
-        $course = $this->courseRepository->find($courseId);
+        $course = $this->entityManager->find(Course::class, $courseId);
         if (!$course) {
             throw new CourseNotFoundException($courseId);
         }
@@ -79,7 +76,7 @@ class EnrollmentService
      */
     public function getUserEnrollments(int $userId): array
     {
-        $user = $this->userRepository->find($userId);
+        $user = $this->entityManager->find(User::class, $userId);
         if (!$user) {
             throw new UserNotFoundException($userId);
         }

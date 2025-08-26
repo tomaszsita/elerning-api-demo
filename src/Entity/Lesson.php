@@ -38,12 +38,15 @@ class Lesson
     private ?Course $course = null;
 
     #[ORM\OneToMany(mappedBy: 'lesson', targetEntity: Progress::class, orphanRemoval: true)]
+    /** @var Collection<int, Progress> */
     private Collection $progresses;
 
     #[ORM\OneToMany(mappedBy: 'lesson', targetEntity: Prerequisite::class, orphanRemoval: true)]
+    /** @var Collection<int, Prerequisite> */
     private Collection $prerequisites;
 
     #[ORM\OneToMany(mappedBy: 'requiredLesson', targetEntity: Prerequisite::class, orphanRemoval: true)]
+    /** @var Collection<int, Prerequisite> */
     private Collection $requiredBy;
 
     public function __construct()
