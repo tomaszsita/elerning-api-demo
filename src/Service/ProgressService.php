@@ -14,8 +14,6 @@ use App\Repository\Interfaces\LessonRepositoryInterface;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
 use App\Repository\Interfaces\EnrollmentRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-
 class ProgressService
 {
     public function __construct(
@@ -23,15 +21,13 @@ class ProgressService
         UserRepositoryInterface $userRepository,
         LessonRepositoryInterface $lessonRepository,
         ProgressRepositoryInterface $progressRepository,
-        EnrollmentRepositoryInterface $enrollmentRepository,
-        EventDispatcherInterface $eventDispatcher
+        EnrollmentRepositoryInterface $enrollmentRepository
     ) {
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
         $this->lessonRepository = $lessonRepository;
         $this->progressRepository = $progressRepository;
         $this->enrollmentRepository = $enrollmentRepository;
-        $this->eventDispatcher = $eventDispatcher;
     }
 
     private EntityManagerInterface $entityManager;
@@ -39,7 +35,6 @@ class ProgressService
     private LessonRepositoryInterface $lessonRepository;
     private ProgressRepositoryInterface $progressRepository;
     private EnrollmentRepositoryInterface $enrollmentRepository;
-    private EventDispatcherInterface $eventDispatcher;
 
     public function createProgress(int $userId, int $lessonId, string $requestId, string $status = 'complete'): Progress
     {
@@ -56,7 +51,6 @@ class ProgressService
 
         $progress = $this->createProgressEntity($user, $lesson, $requestId, $progressStatus);
         $this->saveProgress($progress);
-        $this->dispatchCompletionEventIfNeeded($progress, $status);
 
         return $progress;
     }
@@ -124,15 +118,7 @@ class ProgressService
         $this->entityManager->flush();
     }
 
-    private function dispatchCompletionEventIfNeeded(Progress $progress, string $status): void
-    {
-        if ($status === 'complete') {
-            $this->eventDispatcher->dispatch(
-                new \App\Event\ProgressCompletedEvent($progress),
-                'progress.completed'
-            );
-        }
-    }
+
 
     private function checkPrerequisites(int $userId, Lesson $lesson): void
     {

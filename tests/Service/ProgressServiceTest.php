@@ -8,7 +8,6 @@ use App\Entity\Lesson;
 use App\Entity\Progress;
 use App\Entity\User;
 use App\Enum\ProgressStatus;
-use App\Event\ProgressCompletedEvent;
 use App\Exception\LessonNotFoundException;
 use App\Exception\PrerequisitesNotMetException;
 use App\Exception\UserNotEnrolledException;
@@ -20,7 +19,6 @@ use App\Repository\Interfaces\UserRepositoryInterface;
 use App\Service\ProgressService;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ProgressServiceTest extends TestCase
 {
@@ -30,7 +28,6 @@ class ProgressServiceTest extends TestCase
     private LessonRepositoryInterface $lessonRepository;
     private ProgressRepositoryInterface $progressRepository;
     private EnrollmentRepositoryInterface $enrollmentRepository;
-    private EventDispatcherInterface $eventDispatcher;
 
     protected function setUp(): void
     {
@@ -39,15 +36,13 @@ class ProgressServiceTest extends TestCase
         $this->lessonRepository = $this->createMock(LessonRepositoryInterface::class);
         $this->progressRepository = $this->createMock(ProgressRepositoryInterface::class);
         $this->enrollmentRepository = $this->createMock(EnrollmentRepositoryInterface::class);
-        $this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
 
         $this->progressService = new ProgressService(
             $this->entityManager,
             $this->userRepository,
             $this->lessonRepository,
             $this->progressRepository,
-            $this->enrollmentRepository,
-            $this->eventDispatcher
+            $this->enrollmentRepository
         );
     }
 
@@ -98,10 +93,6 @@ class ProgressServiceTest extends TestCase
 
         $this->entityManager->expects($this->once())
             ->method('flush');
-
-        $this->eventDispatcher->expects($this->once())
-            ->method('dispatch')
-            ->with($this->isInstanceOf(ProgressCompletedEvent::class), 'progress.completed');
 
         $result = $this->progressService->createProgress(1, 1, 'test-request-123', 'complete');
 

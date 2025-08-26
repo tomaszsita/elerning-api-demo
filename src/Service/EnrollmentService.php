@@ -13,29 +13,24 @@ use App\Repository\Interfaces\UserRepositoryInterface;
 use App\Repository\Interfaces\CourseRepositoryInterface;
 use App\Repository\Interfaces\EnrollmentRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-
 class EnrollmentService
 {
     public function __construct(
         EntityManagerInterface $entityManager,
         UserRepositoryInterface $userRepository,
         CourseRepositoryInterface $courseRepository,
-        EnrollmentRepositoryInterface $enrollmentRepository,
-        EventDispatcherInterface $eventDispatcher
+        EnrollmentRepositoryInterface $enrollmentRepository
     ) {
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
         $this->courseRepository = $courseRepository;
         $this->enrollmentRepository = $enrollmentRepository;
-        $this->eventDispatcher = $eventDispatcher;
     }
 
     private EntityManagerInterface $entityManager;
     private UserRepositoryInterface $userRepository;
     private CourseRepositoryInterface $courseRepository;
     private EnrollmentRepositoryInterface $enrollmentRepository;
-    private EventDispatcherInterface $eventDispatcher;
 
     public function enrollUser(int $userId, int $courseId): Enrollment
     {
@@ -71,11 +66,6 @@ class EnrollmentService
             $this->entityManager->persist($enrollment);
             $this->entityManager->flush();
             $this->entityManager->commit();
-
-            $this->eventDispatcher->dispatch(
-                new \App\Event\EnrollmentCreatedEvent($enrollment),
-                'enrollment.created'
-            );
 
             return $enrollment;
         } catch (\Exception $e) {

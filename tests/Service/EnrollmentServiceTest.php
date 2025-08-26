@@ -15,8 +15,6 @@ use App\Repository\UserRepository;
 use App\Service\EnrollmentService;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-
 class EnrollmentServiceTest extends TestCase
 {
     private EnrollmentService $enrollmentService;
@@ -24,7 +22,6 @@ class EnrollmentServiceTest extends TestCase
     private UserRepository $userRepository;
     private CourseRepository $courseRepository;
     private EnrollmentRepository $enrollmentRepository;
-    private EventDispatcherInterface $eventDispatcher;
 
     protected function setUp(): void
     {
@@ -32,14 +29,12 @@ class EnrollmentServiceTest extends TestCase
         $this->userRepository = $this->createMock(UserRepository::class);
         $this->courseRepository = $this->createMock(CourseRepository::class);
         $this->enrollmentRepository = $this->createMock(EnrollmentRepository::class);
-        $this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
 
         $this->enrollmentService = new EnrollmentService(
             $this->entityManager,
             $this->userRepository,
             $this->courseRepository,
-            $this->enrollmentRepository,
-            $this->eventDispatcher
+            $this->enrollmentRepository
         );
     }
 
@@ -93,9 +88,6 @@ class EnrollmentServiceTest extends TestCase
             
         $this->entityManager->expects($this->once())
             ->method('commit');
-            
-        $this->eventDispatcher->expects($this->once())
-            ->method('dispatch');
 
         // Act
         $result = $this->enrollmentService->enrollUser($userId, $courseId);

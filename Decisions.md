@@ -47,6 +47,24 @@
 - **Serializer Component:** Use Symfony Serializer for more advanced serialization features (groups, normalization, etc.)
 - **API Resources:** Implement Laravel-style API resources for complex response transformations
 
+### 3.2. Event Listeners
+**Decision:** Remove unused domain events for now
+**Rationale:**
+- YAGNI principle - no current need for event-driven architecture
+- Reduce complexity and maintenance burden
+- Avoid performance overhead from unused event dispatching
+- Keep codebase focused on current requirements
+
+**Implementation:** Removed `EnrollmentCreatedEvent` and `ProgressCompletedEvent`
+
+**Potential Future Improvements:**
+- **Email Notifications:** Add listeners for enrollment/progress events to send welcome emails, completion certificates
+- **Audit Logging:** Implement listeners to log all enrollment and progress changes for compliance
+- **Real-time Notifications:** Add WebSocket listeners for live progress updates
+- **Analytics Integration:** Create listeners to track user behavior and course completion metrics
+- **Cache Invalidation:** Implement listeners to clear relevant caches when data changes
+- **External Integrations:** Add listeners for third-party service integrations (LMS, CRM, etc.)
+
 ### 4. Value Objects
 **Decision:** Create Value Objects for domain concepts
 **Rationale:**
