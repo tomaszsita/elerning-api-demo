@@ -94,9 +94,9 @@ class EnrollmentServiceTest extends TestCase
         $userId = 999;
         $courseId = 1;
         
-        $this->userRepository->expects($this->once())
+        $this->entityManager->expects($this->once())
             ->method('find')
-            ->with($userId)
+            ->with(User::class, $userId)
             ->willReturn(null);
 
         // Act & Assert
@@ -112,15 +112,12 @@ class EnrollmentServiceTest extends TestCase
         
         $user = $this->createMock(User::class);
         
-        $this->userRepository->expects($this->once())
+        $this->entityManager->expects($this->exactly(2))
             ->method('find')
-            ->with($userId)
-            ->willReturn($user);
-            
-        $this->courseRepository->expects($this->once())
-            ->method('find')
-            ->with($courseId)
-            ->willReturn(null);
+            ->willReturnMap([
+                [User::class, $userId, null, null, $user],
+                [Course::class, $courseId, null, null, null]
+            ]);
 
         // Act & Assert
         $this->expectException(CourseNotFoundException::class);
@@ -136,15 +133,12 @@ class EnrollmentServiceTest extends TestCase
         $user = $this->createMock(User::class);
         $course = $this->createMock(Course::class);
         
-        $this->userRepository->expects($this->once())
+        $this->entityManager->expects($this->exactly(2))
             ->method('find')
-            ->with($userId)
-            ->willReturn($user);
-            
-        $this->courseRepository->expects($this->once())
-            ->method('find')
-            ->with($courseId)
-            ->willReturn($course);
+            ->willReturnMap([
+                [User::class, $userId, null, null, $user],
+                [Course::class, $courseId, null, null, $course]
+            ]);
             
         $this->enrollmentRepository->expects($this->once())
             ->method('existsByUserAndCourse')
@@ -165,15 +159,13 @@ class EnrollmentServiceTest extends TestCase
         $user = $this->createMock(User::class);
         $course = $this->createMock(Course::class);
         
-        $this->userRepository->expects($this->once())
+        $this->entityManager->expects($this->exactly(3))
             ->method('find')
-            ->with($userId)
-            ->willReturn($user);
-            
-        $this->courseRepository->expects($this->once())
-            ->method('find')
-            ->with($courseId)
-            ->willReturn($course);
+            ->willReturnMap([
+                [User::class, $userId, null, null, $user],
+                [Course::class, $courseId, null, null, $course],
+                [Course::class, $courseId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE, null, $course]
+            ]);
             
         $this->enrollmentRepository->expects($this->once())
             ->method('existsByUserAndCourse')
@@ -191,11 +183,6 @@ class EnrollmentServiceTest extends TestCase
             
         $this->entityManager->expects($this->once())
             ->method('beginTransaction');
-            
-        $this->entityManager->expects($this->once())
-            ->method('find')
-            ->with(Course::class, $courseId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE)
-            ->willReturn($course);
             
         $this->entityManager->expects($this->atLeastOnce())
             ->method('rollback');
