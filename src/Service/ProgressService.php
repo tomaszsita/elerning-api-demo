@@ -9,6 +9,7 @@ use App\Enum\ProgressStatus;
 use App\Exception\UserNotFoundException;
 use App\Exception\LessonNotFoundException;
 use App\Exception\PrerequisitesNotMetException;
+use App\Exception\InvalidStatusTransitionException;
 use App\Repository\Interfaces\UserRepositoryInterface;
 use App\Repository\Interfaces\LessonRepositoryInterface;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
@@ -18,20 +19,17 @@ class ProgressService
 {
     public function __construct(
         EntityManagerInterface $entityManager,
-        UserRepositoryInterface $userRepository,
         LessonRepositoryInterface $lessonRepository,
         ProgressRepositoryInterface $progressRepository,
         EnrollmentRepositoryInterface $enrollmentRepository
     ) {
         $this->entityManager = $entityManager;
-        $this->userRepository = $userRepository;
         $this->lessonRepository = $lessonRepository;
         $this->progressRepository = $progressRepository;
         $this->enrollmentRepository = $enrollmentRepository;
     }
 
     private EntityManagerInterface $entityManager;
-    private UserRepositoryInterface $userRepository;
     private LessonRepositoryInterface $lessonRepository;
     private ProgressRepositoryInterface $progressRepository;
     private EnrollmentRepositoryInterface $enrollmentRepository;

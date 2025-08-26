@@ -58,7 +58,11 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-html coverage",
+        "phpstan": "phpstan analyse",
+        "phpstan:baseline": "phpstan analyse --generate-baseline"
     },
     "conflict": {
         "symfony/symfony": "*"
@@ -70,6 +74,7 @@
         }
     },
     "require-dev": {
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^12.3",
         "symfony/browser-kit": "7.*",
         "symfony/css-selector": "7.*"

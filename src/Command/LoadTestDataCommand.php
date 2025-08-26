@@ -18,19 +18,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class LoadTestDataCommand extends Command
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
-        \App\Repository\UserRepository $userRepository,
-        \App\Repository\CourseRepository $courseRepository
+        EntityManagerInterface $entityManager
     ) {
         parent::__construct();
         $this->entityManager = $entityManager;
-        $this->userRepository = $userRepository;
-        $this->courseRepository = $courseRepository;
     }
 
     private EntityManagerInterface $entityManager;
-    private \App\Repository\UserRepository $userRepository;
-    private \App\Repository\CourseRepository $courseRepository;
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

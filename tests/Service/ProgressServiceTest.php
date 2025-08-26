@@ -15,7 +15,7 @@ use App\Exception\UserNotFoundException;
 use App\Repository\Interfaces\EnrollmentRepositoryInterface;
 use App\Repository\Interfaces\LessonRepositoryInterface;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
-use App\Repository\Interfaces\UserRepositoryInterface;
+
 use App\Service\ProgressService;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
@@ -24,7 +24,6 @@ class ProgressServiceTest extends TestCase
 {
     private ProgressService $progressService;
     private EntityManagerInterface $entityManager;
-    private UserRepositoryInterface $userRepository;
     private LessonRepositoryInterface $lessonRepository;
     private ProgressRepositoryInterface $progressRepository;
     private EnrollmentRepositoryInterface $enrollmentRepository;
@@ -32,14 +31,12 @@ class ProgressServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->userRepository = $this->createMock(UserRepositoryInterface::class);
         $this->lessonRepository = $this->createMock(LessonRepositoryInterface::class);
         $this->progressRepository = $this->createMock(ProgressRepositoryInterface::class);
         $this->enrollmentRepository = $this->createMock(EnrollmentRepositoryInterface::class);
 
         $this->progressService = new ProgressService(
             $this->entityManager,
-            $this->userRepository,
             $this->lessonRepository,
             $this->progressRepository,
             $this->enrollmentRepository

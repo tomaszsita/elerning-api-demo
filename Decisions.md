@@ -154,6 +154,24 @@
 - Real HTTP requests
 - API contract validation
 
+### 13. Static Code Analysis
+**Decision:** Use PHPStan for static code analysis
+**Rationale:**
+- Catch type errors before runtime
+- Enforce coding standards
+- Improve code quality
+- Prevent bugs early
+
+**Implementation:** 
+- PHPStan level 6 (strict)
+- Exclude tests from analysis
+- Ignore Doctrine-specific patterns
+- Custom ignore patterns for common false positives
+
+**Commands:**
+- `composer phpstan` - Run static analysis
+- `composer phpstan:baseline` - Generate baseline for new errors
+
 ## Performance & Scalability
 
 ### 13. Database Indexing

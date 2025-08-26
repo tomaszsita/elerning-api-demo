@@ -13,6 +13,7 @@ abstract class AbstractFeatureTest extends WebTestCase
 {
     protected EntityManagerInterface $entityManager;
     protected ContainerInterface $container;
+    protected $client;
 
     protected function setUp(): void
     {

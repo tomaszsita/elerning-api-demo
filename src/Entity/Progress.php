@@ -104,7 +104,7 @@ class Progress implements \JsonSerializable
 
     public function canTransitionTo(string $newStatus): bool
     {
-        return \App\Enum\ProgressStatus::canTransition($this->status, $newStatus);
+        return \App\Enum\ProgressStatus::canTransition($this->status, \App\Enum\ProgressStatus::fromString($newStatus));
     }
 
     public function toArray(): array
