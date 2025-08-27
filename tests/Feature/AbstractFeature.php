@@ -74,6 +74,29 @@ abstract class AbstractFeature extends WebTestCase
         return $lesson;
     }
 
+    protected function createTestUser(string $name, string $email): User
+    {
+        $user = new User();
+        $user->setName($name);
+        $user->setEmail($email);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+        
+        return $user;
+    }
+
+    protected function createCourseWithLimitedSeats(int $maxSeats): Course
+    {
+        $course = new Course();
+        $course->setTitle('Limited Course');
+        $course->setDescription('Course with limited seats');
+        $course->setMaxSeats($maxSeats);
+        $this->entityManager->persist($course);
+        $this->entityManager->flush();
+        
+        return $course;
+    }
+
     private function cleanupDatabase(): void
     {
         $this->entityManager->createQuery('DELETE FROM App\Entity\Progress')->execute();

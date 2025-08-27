@@ -144,4 +144,38 @@ class CourseControllerTest extends AbstractFeature
         $this->assertArrayHasKey('error', $responseData);
         $this->assertStringContainsString('already enrolled', $responseData['error']);
     }
+
+    public function testEnrollInCourseFull(): void
+    {
+        // Create a course with only 1 seat
+        $course = $this->createCourseWithLimitedSeats(1);
+        
+        // First user enrolls successfully
+        $user1 = $this->getTestUser();
+        $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'user_id' => $user1->getId(),
+        ]));
+
+        $this->assertResponseStatusCodeSame(201);
+
+        // Second user tries to enroll - should fail because course is full
+        $user2 = $this->createTestUser('Jane Smith', 'jane.smith@example.com');
+        
+        // Clear entity manager to ensure fresh state
+        $this->entityManager->clear();
+        
+        $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'user_id' => $user2->getId(),
+        ]));
+
+        $this->assertResponseStatusCodeSame(409); // Conflict
+        
+        $responseData = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('error', $responseData);
+        $this->assertStringContainsString('is full', $responseData['error']);
+    }
 }

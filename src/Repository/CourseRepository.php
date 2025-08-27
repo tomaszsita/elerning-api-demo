@@ -25,13 +25,15 @@ class CourseRepository extends ServiceEntityRepository implements CourseReposito
 
     public function countEnrollmentsByCourse(int $courseId): int
     {
-        return $this->createQueryBuilder('c')
+        $result = $this->createQueryBuilder('c')
             ->select('COUNT(e.id)')
             ->leftJoin('c.enrollments', 'e')
             ->where('c.id = :courseId')
             ->setParameter('courseId', $courseId)
             ->getQuery()
             ->getSingleScalarResult();
+        
+        return (int) $result;
     }
 
     public function save(Course $course): void

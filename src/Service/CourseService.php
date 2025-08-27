@@ -54,27 +54,18 @@ class CourseService
             throw new \App\Exception\UserAlreadyEnrolledException($userId, $courseId);
         }
 
-        $this->entityManager->beginTransaction();
-        try {
-            $course = $this->entityManager->find(Course::class, $courseId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE);
-            
-            $enrollmentCount = $this->courseRepository->countEnrollmentsByCourse($courseId);
-            if ($enrollmentCount >= $course->getMaxSeats()) {
-                $this->entityManager->rollback();
-                throw new \App\Exception\CourseFullException($courseId);
-            }
-
-            $enrollment = $this->enrollmentFactory->create($user, $course);
-
-            $this->entityManager->persist($enrollment);
-            $this->entityManager->flush();
-            $this->entityManager->commit();
-
-            return $enrollment;
-        } catch (\Exception $e) {
-            $this->entityManager->rollback();
-            throw $e;
+        // Check if course is full before creating enrollment
+        $enrollmentCount = $this->courseRepository->countEnrollmentsByCourse($courseId);
+        if ($enrollmentCount >= $course->getMaxSeats()) {
+            throw new \App\Exception\CourseFullException($courseId);
         }
+
+        $enrollment = $this->enrollmentFactory->create($user, $course);
+
+        $this->entityManager->persist($enrollment);
+        $this->entityManager->flush();
+
+        return $enrollment;
     }
 
     /**
