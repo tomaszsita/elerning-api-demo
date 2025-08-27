@@ -13,6 +13,7 @@ class ProgressStatusTest extends TestCase
             [ProgressStatus::PENDING, ProgressStatus::COMPLETE],
             [ProgressStatus::PENDING, ProgressStatus::FAILED],
             [ProgressStatus::FAILED, ProgressStatus::COMPLETE],
+            [ProgressStatus::COMPLETE, ProgressStatus::PENDING], // Can reset to pending
         ];
 
         foreach ($validTransitions as [$fromStatus, $toStatus]) {
@@ -23,10 +24,9 @@ class ProgressStatusTest extends TestCase
     public function testInvalidTransitions(): void
     {
         $invalidTransitions = [
-            [ProgressStatus::COMPLETE, ProgressStatus::PENDING],
-            [ProgressStatus::COMPLETE, ProgressStatus::FAILED],
-            [ProgressStatus::FAILED, ProgressStatus::PENDING],
-            [ProgressStatus::PENDING, ProgressStatus::PENDING],
+            [ProgressStatus::COMPLETE, ProgressStatus::FAILED], // Cannot go from complete to failed
+            [ProgressStatus::FAILED, ProgressStatus::PENDING], // Cannot go from failed to pending
+            [ProgressStatus::PENDING, ProgressStatus::PENDING], // Cannot stay in same status
         ];
 
         foreach ($invalidTransitions as [$fromStatus, $toStatus]) {
@@ -47,7 +47,7 @@ class ProgressStatusTest extends TestCase
         );
 
         $this->assertEquals(
-            [],
+            [ProgressStatus::PENDING], // Can reset to pending
             ProgressStatus::getAllowedTransitions(ProgressStatus::COMPLETE)
         );
     }

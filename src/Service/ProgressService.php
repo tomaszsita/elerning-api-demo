@@ -74,8 +74,10 @@ class ProgressService
     public function deleteProgress(int $userId, int $lessonId): void
     {
         $progress = $this->progressRepository->findByUserAndLesson($userId, $lessonId);
-        if ($progress) {
-            $this->entityManager->remove($progress);
+        if ($progress && $progress->getStatus() === \App\Enum\ProgressStatus::COMPLETE) {
+            // Reset to pending instead of deleting - preserves audit trail
+            $progress->setStatus(\App\Enum\ProgressStatus::PENDING);
+            $progress->setCompletedAt(null);
             $this->entityManager->flush();
         }
     }

@@ -118,6 +118,19 @@
 
 **Implementation:** `request_id` field in Progress entity
 
+### 15. Progress Reset Strategy
+**Decision:** Reset progress to 'pending' instead of deleting records
+**Rationale:**
+- Preserves audit trail and learning history
+- Enables analytics on user learning patterns
+- Maintains data integrity for business intelligence
+- Better user experience with learning history
+
+**Implementation:** 
+- DELETE endpoint resets status to PENDING instead of removing record
+- ProgressStatus enum allows COMPLETE → PENDING transition
+- CompletedAt timestamp is cleared on reset
+
 ## API Design
 
 ### 9. RESTful Endpoints

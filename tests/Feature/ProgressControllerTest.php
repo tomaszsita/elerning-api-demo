@@ -215,10 +215,21 @@ class ProgressControllerTest extends BaseFeatureTest
 
         $this->assertResponseStatusCodeSame(201);
 
-        // Delete progress
+        // Verify progress is complete
+        $this->client->request('GET', '/progress/' . $user->getId() . '/courses/' . $course->getId());
+        $responseData = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals(1, $responseData['completed']);
+
+        // Reset progress to pending
         $this->client->request('DELETE', '/progress/' . $user->getId() . '/lessons/' . $lesson->getId());
 
         $this->assertResponseStatusCodeSame(204);
+
+        // Verify progress is now pending
+        $this->client->request('GET', '/progress/' . $user->getId() . '/courses/' . $course->getId());
+        $responseData = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals(0, $responseData['completed']);
+        $this->assertEquals(0, $responseData['percent']); // 0% because no completed lessons
     }
 
     public function testDeleteProgressNotFound(): void
