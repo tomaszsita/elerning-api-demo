@@ -36,6 +36,9 @@ Chose to reset progress to 'pending' instead of deleting records. This preserves
 ### Transactions
 EnrollmentService uses pessimistic locking with proper transaction management for concurrent enrollment safety. Checks for existing transactions to avoid nested transaction issues.
 
+### Exceptions
+Consolidated multiple "not found" exceptions into a single `EntityNotFoundException` for better maintainability and consistency.
+
 ## Requirements Coverage
 
 ### Core Features ✅

@@ -4,7 +4,7 @@ namespace App\Tests\Exception;
 
 use App\Exception\HttpExceptionMapping;
 use App\Exception\InvalidStatusTransitionException;
-use App\Exception\UserNotFoundException;
+use App\Exception\EntityNotFoundException;
 use App\Exception\CourseFullException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -24,8 +24,8 @@ class HttpExceptionMappingTest extends TestCase
                 new InvalidStatusTransitionException('pending', 'invalid'),
                 400
             ],
-            'UserNotFoundException returns 404' => [
-                new UserNotFoundException(123),
+            'EntityNotFoundException returns 404' => [
+                new EntityNotFoundException('User', 123),
                 404
             ],
             'CourseFullException returns 409' => [
@@ -41,7 +41,7 @@ class HttpExceptionMappingTest extends TestCase
 
     public function testGetErrorMessage(): void
     {
-        $exception = new UserNotFoundException(123);
+        $exception = new EntityNotFoundException('User', 123);
         $expectedMessage = 'User 123 not found';
         
         $this->assertEquals($expectedMessage, HttpExceptionMapping::getErrorMessage($exception));

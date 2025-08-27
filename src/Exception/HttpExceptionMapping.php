@@ -12,10 +12,7 @@ class HttpExceptionMapping
         PrerequisitesNotMetException::class => 409,
         
         // 404 Not Found - Resource not found
-        UserNotFoundException::class => 404,
-        CourseNotFoundException::class => 404,
-        LessonNotFoundException::class => 404,
-        ProgressNotFoundException::class => 404,
+        EntityNotFoundException::class => 404,
         
         // 409 Conflict - Business rule violations
         CourseFullException::class => 409,

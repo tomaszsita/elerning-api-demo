@@ -6,9 +6,7 @@ use App\Entity\Course;
 use App\Entity\User;
 use App\Entity\Lesson;
 use App\Enum\ProgressStatus;
-use App\Exception\CourseNotFoundException;
-use App\Exception\UserNotFoundException;
-use App\Exception\LessonNotFoundException;
+use App\Exception\EntityNotFoundException;
 use App\Exception\InvalidStatusTransitionException;
 use App\Repository\Interfaces\EnrollmentRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,7 +28,7 @@ class ValidationService
     {
         $user = $this->entityManager->find(User::class, $userId);
         if (!$user) {
-            throw new UserNotFoundException($userId);
+            throw new EntityNotFoundException('User', $userId);
         }
         return $user;
     }
@@ -39,7 +37,7 @@ class ValidationService
     {
         $lesson = $this->entityManager->find(Lesson::class, $lessonId);
         if (!$lesson) {
-            throw new LessonNotFoundException($lessonId);
+            throw new EntityNotFoundException('Lesson', $lessonId);
         }
         return $lesson;
     }
@@ -48,7 +46,7 @@ class ValidationService
     {
         $course = $this->entityManager->find(Course::class, $courseId);
         if (!$course) {
-            throw new CourseNotFoundException($courseId);
+            throw new EntityNotFoundException('Course', $courseId);
         }
         return $course;
     }

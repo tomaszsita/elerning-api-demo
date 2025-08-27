@@ -8,10 +8,9 @@ use App\Entity\Lesson;
 use App\Entity\Progress;
 use App\Entity\User;
 use App\Enum\ProgressStatus;
-use App\Exception\LessonNotFoundException;
+use App\Exception\EntityNotFoundException;
 use App\Exception\PrerequisitesNotMetException;
 use App\Exception\UserNotEnrolledException;
-use App\Exception\UserNotFoundException;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
 use App\Service\ProgressService;
 use App\Service\ValidationService;
@@ -124,9 +123,9 @@ class ProgressServiceTest extends TestCase
         $this->validationService->expects($this->once())
             ->method('validateAndGetUser')
             ->with(999)
-            ->willThrowException(new UserNotFoundException(999));
+            ->willThrowException(new EntityNotFoundException('User', 999));
 
-        $this->expectException(UserNotFoundException::class);
+        $this->expectException(EntityNotFoundException::class);
         $this->expectExceptionMessage('User 999 not found');
 
         $this->progressService->createProgress(999, 1, 'test-request-123');
@@ -148,9 +147,9 @@ class ProgressServiceTest extends TestCase
         $this->validationService->expects($this->once())
             ->method('validateAndGetLesson')
             ->with(999)
-            ->willThrowException(new LessonNotFoundException(999));
+            ->willThrowException(new EntityNotFoundException('Lesson', 999));
 
-        $this->expectException(LessonNotFoundException::class);
+        $this->expectException(EntityNotFoundException::class);
         $this->expectExceptionMessage('Lesson 999 not found');
 
         $this->progressService->createProgress(1, 999, 'test-request-123');
@@ -245,9 +244,9 @@ class ProgressServiceTest extends TestCase
         $this->validationService->expects($this->once())
             ->method('validateAndGetUser')
             ->with(999)
-            ->willThrowException(new UserNotFoundException(999));
+            ->willThrowException(new EntityNotFoundException('User', 999));
 
-        $this->expectException(UserNotFoundException::class);
+        $this->expectException(EntityNotFoundException::class);
 
         $this->progressService->getUserProgress(999, 1);
     }

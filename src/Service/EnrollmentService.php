@@ -7,8 +7,7 @@ use App\Entity\User;
 use App\Entity\Course;
 use App\Exception\CourseFullException;
 use App\Exception\UserAlreadyEnrolledException;
-use App\Exception\UserNotFoundException;
-use App\Exception\CourseNotFoundException;
+use App\Exception\EntityNotFoundException;
 use App\Repository\Interfaces\CourseRepositoryInterface;
 use App\Repository\Interfaces\EnrollmentRepositoryInterface;
 use App\Factory\EnrollmentFactory;
@@ -36,12 +35,12 @@ class EnrollmentService
     {
         $user = $this->entityManager->find(User::class, $userId);
         if (!$user) {
-            throw new UserNotFoundException($userId);
+            throw new EntityNotFoundException('User', $userId);
         }
 
         $course = $this->entityManager->find(Course::class, $courseId);
         if (!$course) {
-            throw new CourseNotFoundException($courseId);
+            throw new EntityNotFoundException('Course', $courseId);
         }
 
         if ($this->enrollmentRepository->existsByUserAndCourse($userId, $courseId)) {
@@ -49,13 +48,7 @@ class EnrollmentService
         }
 
         // Use pessimistic locking for concurrent enrollment safety
-        $connection = $this->entityManager->getConnection();
-        $wasInTransaction = $connection->isTransactionActive();
-        
-        if (!$wasInTransaction) {
-            $this->entityManager->beginTransaction();
-        }
-        
+        $this->entityManager->beginTransaction();
         try {
             $course = $this->entityManager->find(Course::class, $courseId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE);
             
@@ -67,16 +60,11 @@ class EnrollmentService
             $enrollment = $this->enrollmentFactory->create($user, $course);
             $this->entityManager->persist($enrollment);
             $this->entityManager->flush();
-            
-            if (!$wasInTransaction) {
-                $this->entityManager->commit();
-            }
+            $this->entityManager->commit();
 
             return $enrollment;
         } catch (\Exception $e) {
-            if (!$wasInTransaction) {
-                $this->entityManager->rollback();
-            }
+            $this->entityManager->rollback();
             throw $e;
         }
     }
@@ -88,7 +76,7 @@ class EnrollmentService
     {
         $user = $this->entityManager->find(User::class, $userId);
         if (!$user) {
-            throw new UserNotFoundException($userId);
+            throw new EntityNotFoundException('User', $userId);
         }
 
         return $this->enrollmentRepository->findByUser($userId);
