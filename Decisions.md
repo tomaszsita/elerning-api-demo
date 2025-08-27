@@ -34,7 +34,7 @@ Chose to reset progress to 'pending' instead of deleting records. This preserves
 **Trade-off**: Slightly more complex, but business value of keeping history outweighs the complexity.
 
 ### Transactions
-Kept it simple for the coding challenge. Could add proper locking for production, but testability was more important here.
+Used simple operations without complex locking. For production, I'd add pessimistic locking to handle concurrent enrollments, but the current approach works well for the challenge scope.
 
 ## Requirements Coverage
 
@@ -81,4 +81,4 @@ Used standard patterns:
 - Error handling without exposing internals
 - Stateless API (easy to scale)
 
-The implementation focuses on clean, testable code while meeting all requirements. Could add more features like caching, rate limiting, or async processing, but kept it focused for the challenge.
+The implementation focuses on clean, testable code while meeting all requirements. The architecture allows for easy addition of features like caching, rate limiting, or async processing when needed.
