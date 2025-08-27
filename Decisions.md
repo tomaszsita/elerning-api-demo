@@ -21,6 +21,13 @@ All repositories implement interfaces. This makes testing easier (can mock them)
 ### RESTful API
 Standard REST conventions with proper HTTP codes (400, 404, 409). Nothing fancy, just predictable endpoints.
 
+### API Design Choices
+
+#### POST /progress endpoint
+- **Omitted `course_id`**: Redundant since it can be derived from `lesson_id`. This simplifies the API and reduces potential inconsistencies.
+- **Added `action` parameter**: Allows users to specify progress status ('complete', 'fail', 'pending') instead of defaulting to 'complete'. This provides more flexibility while maintaining backward compatibility (defaults to 'complete').
+- **Validation**: `action` is validated against allowed choices to prevent invalid states.
+
 ## Database Design Choices
 
 ### Prerequisites: Order-based vs Explicit Entity

@@ -36,7 +36,8 @@ class ProgressController
         $createRequest = new CreateProgressRequest(
             $data['user_id'] ?? 0,
             $data['lesson_id'] ?? 0,
-            $data['request_id'] ?? ''
+            $data['request_id'] ?? '',
+            $data['action'] ?? 'complete'
         );
 
         $errors = $this->validator->validate($createRequest);
@@ -51,7 +52,8 @@ class ProgressController
         $progress = $this->progressService->createProgress(
             $createRequest->userId,
             $createRequest->lessonId,
-            $createRequest->requestId
+            $createRequest->requestId,
+            $createRequest->action
         );
 
         return new JsonResponse($progress->toArray(), Response::HTTP_CREATED);

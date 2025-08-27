@@ -37,7 +37,7 @@ class ProgressService
     private EventDispatcherInterface $eventDispatcher;
     private ProgressChangedEventFactory $progressChangedEventFactory;
 
-    public function createProgress(int $userId, int $lessonId, string $requestId, string $status = 'complete'): Progress
+    public function createProgress(int $userId, int $lessonId, string $requestId, string $action = 'complete'): Progress
     {
         $existingProgress = $this->progressRepository->findByRequestId($requestId);
         if ($existingProgress) {
@@ -48,7 +48,7 @@ class ProgressService
         $lesson = $this->validationService->validateAndGetLesson($lessonId);
         $this->validationService->validateEnrollment($userId, $lesson);
         $this->prerequisitesService->checkPrerequisites($userId, $lesson);
-        $progressStatus = $this->validationService->validateAndGetStatus($status);
+        $progressStatus = $this->validationService->validateAndGetStatus($action);
 
         $progress = $this->progressFactory->create($user, $lesson, $requestId, $progressStatus);
         $this->saveProgress($progress);
