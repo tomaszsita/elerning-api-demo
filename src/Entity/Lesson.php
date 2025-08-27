@@ -41,19 +41,11 @@ class Lesson
     /** @var Collection<int, Progress> */
     private Collection $progresses;
 
-    #[ORM\OneToMany(mappedBy: 'lesson', targetEntity: Prerequisite::class, orphanRemoval: true)]
-    /** @var Collection<int, Prerequisite> */
-    private Collection $prerequisites;
 
-    #[ORM\OneToMany(mappedBy: 'requiredLesson', targetEntity: Prerequisite::class, orphanRemoval: true)]
-    /** @var Collection<int, Prerequisite> */
-    private Collection $requiredBy;
 
     public function __construct()
     {
         $this->progresses = new ArrayCollection();
-        $this->prerequisites = new ArrayCollection();
-        $this->requiredBy = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -144,57 +136,5 @@ class Lesson
         return $this;
     }
 
-    /**
-     * @return Collection<int, Prerequisite>
-     */
-    public function getPrerequisites(): Collection
-    {
-        return $this->prerequisites;
-    }
 
-    public function addPrerequisite(Prerequisite $prerequisite): self
-    {
-        if (!$this->prerequisites->contains($prerequisite)) {
-            $this->prerequisites->add($prerequisite);
-            $prerequisite->setLesson($this);
-        }
-        return $this;
-    }
-
-    public function removePrerequisite(Prerequisite $prerequisite): self
-    {
-        if ($this->prerequisites->removeElement($prerequisite)) {
-            if ($prerequisite->getLesson() === $this) {
-                $prerequisite->setLesson(null);
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Prerequisite>
-     */
-    public function getRequiredBy(): Collection
-    {
-        return $this->requiredBy;
-    }
-
-    public function addRequiredBy(Prerequisite $requiredBy): self
-    {
-        if (!$this->requiredBy->contains($requiredBy)) {
-            $this->requiredBy->add($requiredBy);
-            $requiredBy->setRequiredLesson($this);
-        }
-        return $this;
-    }
-
-    public function removeRequiredBy(Prerequisite $requiredBy): self
-    {
-        if ($this->requiredBy->removeElement($requiredBy)) {
-            if ($requiredBy->getRequiredLesson() === $this) {
-                $requiredBy->setRequiredLesson(null);
-            }
-        }
-        return $this;
-    }
 }

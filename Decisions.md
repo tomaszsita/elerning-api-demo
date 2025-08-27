@@ -152,6 +152,26 @@
 - Easier to maintain and extend test coverage
 - Better test organization and readability
 
+### 17. Prerequisites Implementation Strategy
+**Decision:** Use order-based prerequisites instead of explicit Prerequisite entity
+**Rationale:**
+- Simpler implementation - prerequisites based on lesson order index
+- No need for complex many-to-many relationships
+- Easier to maintain and understand
+- Follows natural course progression
+
+**Implementation:**
+- Removed Prerequisite entity and PrerequisiteRepository
+- PrerequisitesService uses `findByCourseAndOrderLessThan()` to check previous lessons
+- All lessons with lower orderIndex are considered prerequisites
+- Cleaner database schema without prerequisites table
+
+**Benefits:**
+- Reduced complexity and code maintenance
+- Simpler database schema
+- Natural course progression logic
+- Easier to understand and debug
+
 ## API Design
 
 ### 9. RESTful Endpoints
