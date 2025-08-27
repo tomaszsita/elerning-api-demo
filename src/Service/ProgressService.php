@@ -3,36 +3,30 @@
 namespace App\Service;
 
 use App\Entity\Progress;
-use App\Entity\User;
-use App\Entity\Lesson;
-use App\Enum\ProgressStatus;
-use App\Exception\UserNotFoundException;
-use App\Exception\LessonNotFoundException;
-use App\Exception\PrerequisitesNotMetException;
-use App\Exception\InvalidStatusTransitionException;
-use App\Repository\Interfaces\UserRepositoryInterface;
-use App\Repository\Interfaces\LessonRepositoryInterface;
+use App\Factory\ProgressFactory;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
-use App\Repository\Interfaces\EnrollmentRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 class ProgressService
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
-        LessonRepositoryInterface $lessonRepository,
+        ValidationService $validationService,
+        PrerequisitesService $prerequisitesService,
+        ProgressFactory $progressFactory,
         ProgressRepositoryInterface $progressRepository,
-        EnrollmentRepositoryInterface $enrollmentRepository
+        EntityManagerInterface $entityManager
     ) {
-        $this->entityManager = $entityManager;
-        $this->lessonRepository = $lessonRepository;
+        $this->validationService = $validationService;
+        $this->prerequisitesService = $prerequisitesService;
+        $this->progressFactory = $progressFactory;
         $this->progressRepository = $progressRepository;
-        $this->enrollmentRepository = $enrollmentRepository;
+        $this->entityManager = $entityManager;
     }
 
-    private EntityManagerInterface $entityManager;
-    private LessonRepositoryInterface $lessonRepository;
+    private ValidationService $validationService;
+    private PrerequisitesService $prerequisitesService;
+    private ProgressFactory $progressFactory;
     private ProgressRepositoryInterface $progressRepository;
-    private EnrollmentRepositoryInterface $enrollmentRepository;
+    private EntityManagerInterface $entityManager;
 
     public function createProgress(int $userId, int $lessonId, string $requestId, string $status = 'complete'): Progress
     {
@@ -41,13 +35,13 @@ class ProgressService
             return $existingProgress;
         }
 
-        $user = $this->validateAndGetUser($userId);
-        $lesson = $this->validateAndGetLesson($lessonId);
-        $this->validateEnrollment($userId, $lesson);
-        $this->checkPrerequisites($userId, $lesson);
-        $progressStatus = $this->validateAndGetStatus($status);
+        $user = $this->validationService->validateAndGetUser($userId);
+        $lesson = $this->validationService->validateAndGetLesson($lessonId);
+        $this->validationService->validateEnrollment($userId, $lesson);
+        $this->prerequisitesService->checkPrerequisites($userId, $lesson);
+        $progressStatus = $this->validationService->validateAndGetStatus($status);
 
-        $progress = $this->createProgressEntity($user, $lesson, $requestId, $progressStatus);
+        $progress = $this->progressFactory->create($user, $lesson, $requestId, $progressStatus);
         $this->saveProgress($progress);
 
         return $progress;
@@ -58,89 +52,13 @@ class ProgressService
      */
     public function getUserProgress(int $userId, int $courseId): array
     {
-        $this->validateAndGetUser($userId);
+        $this->validationService->validateAndGetUser($userId);
         return $this->progressRepository->findByUserAndCourse($userId, $courseId);
-    }
-
-    private function validateAndGetUser(int $userId): User
-    {
-        $user = $this->entityManager->find(User::class, $userId);
-        if (!$user) {
-            throw new UserNotFoundException($userId);
-        }
-        return $user;
-    }
-
-    private function validateAndGetLesson(int $lessonId): Lesson
-    {
-        $lesson = $this->entityManager->find(Lesson::class, $lessonId);
-        if (!$lesson) {
-            throw new LessonNotFoundException($lessonId);
-        }
-        return $lesson;
-    }
-
-
-
-    private function validateEnrollment(int $userId, Lesson $lesson): void
-    {
-        if (!$this->enrollmentRepository->existsByUserAndCourse($userId, $lesson->getCourse()->getId())) {
-            throw new \App\Exception\UserNotEnrolledException($userId, $lesson->getCourse()->getId());
-        }
-    }
-
-    private function validateAndGetStatus(string $status): ProgressStatus
-    {
-        try {
-            return ProgressStatus::fromString($status);
-        } catch (\InvalidArgumentException $e) {
-            throw new InvalidStatusTransitionException('', $status);
-        }
-    }
-
-    private function createProgressEntity(User $user, Lesson $lesson, string $requestId, ProgressStatus $status): Progress
-    {
-        $progress = new Progress();
-        $progress->setUser($user);
-        $progress->setLesson($lesson);
-        $progress->setRequestId($requestId);
-        $progress->setStatus($status);
-
-        if ($status === ProgressStatus::COMPLETE) {
-            $progress->setCompletedAt(new \DateTimeImmutable());
-        }
-
-        return $progress;
     }
 
     private function saveProgress(Progress $progress): void
     {
         $this->entityManager->persist($progress);
         $this->entityManager->flush();
-    }
-
-
-
-    private function checkPrerequisites(int $userId, Lesson $lesson): void
-    {
-        $course = $lesson->getCourse();
-        $currentOrderIndex = $lesson->getOrderIndex();
-
-        $prerequisiteLessons = $this->lessonRepository->findByCourseAndOrderLessThan(
-            $course->getId(),
-            $currentOrderIndex
-        );
-
-        foreach ($prerequisiteLessons as $prerequisiteLesson) {
-            $progress = $this->progressRepository->findByUserAndLesson($userId, $prerequisiteLesson->getId());
-            
-            if (!$progress || $progress->getStatus() !== ProgressStatus::COMPLETE) {
-                throw new PrerequisitesNotMetException(
-                    $userId,
-                    $lesson->getId(),
-                    "User {$userId} must complete lesson '{$prerequisiteLesson->getTitle()}' before accessing lesson '{$lesson->getTitle()}'"
-                );
-            }
-        }
     }
 }

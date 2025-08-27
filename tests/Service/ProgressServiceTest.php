@@ -12,34 +12,37 @@ use App\Exception\LessonNotFoundException;
 use App\Exception\PrerequisitesNotMetException;
 use App\Exception\UserNotEnrolledException;
 use App\Exception\UserNotFoundException;
-use App\Repository\Interfaces\EnrollmentRepositoryInterface;
-use App\Repository\Interfaces\LessonRepositoryInterface;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
-
 use App\Service\ProgressService;
+use App\Service\ValidationService;
+use App\Service\PrerequisitesService;
+use App\Factory\ProgressFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 
 class ProgressServiceTest extends TestCase
 {
     private ProgressService $progressService;
-    private EntityManagerInterface $entityManager;
-    private LessonRepositoryInterface $lessonRepository;
+    private ValidationService $validationService;
+    private PrerequisitesService $prerequisitesService;
+    private ProgressFactory $progressFactory;
     private ProgressRepositoryInterface $progressRepository;
-    private EnrollmentRepositoryInterface $enrollmentRepository;
+    private EntityManagerInterface $entityManager;
 
     protected function setUp(): void
     {
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->lessonRepository = $this->createMock(LessonRepositoryInterface::class);
+        $this->validationService = $this->createMock(ValidationService::class);
+        $this->prerequisitesService = $this->createMock(PrerequisitesService::class);
+        $this->progressFactory = $this->createMock(ProgressFactory::class);
         $this->progressRepository = $this->createMock(ProgressRepositoryInterface::class);
-        $this->enrollmentRepository = $this->createMock(EnrollmentRepositoryInterface::class);
+        $this->entityManager = $this->createMock(EntityManagerInterface::class);
 
         $this->progressService = new ProgressService(
-            $this->entityManager,
-            $this->lessonRepository,
+            $this->validationService,
+            $this->prerequisitesService,
+            $this->progressFactory,
             $this->progressRepository,
-            $this->enrollmentRepository
+            $this->entityManager
         );
     }
 
@@ -47,7 +50,6 @@ class ProgressServiceTest extends TestCase
     {
         $user = $this->createMock(User::class);
         $lesson = $this->createMock(Lesson::class);
-        $course = $this->createMock(Course::class);
         $progress = $this->createMock(Progress::class);
 
         $this->progressRepository->expects($this->once())
@@ -55,38 +57,37 @@ class ProgressServiceTest extends TestCase
             ->with('test-request-123')
             ->willReturn(null);
 
-        $this->entityManager->expects($this->exactly(2))
-            ->method('find')
-            ->willReturnMap([
-                [User::class, 1, $user],
-                [Lesson::class, 1, $lesson]
-            ]);
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetUser')
+            ->with(1)
+            ->willReturn($user);
 
-        $lesson->expects($this->exactly(2))
-            ->method('getCourse')
-            ->willReturn($course);
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetLesson')
+            ->with(1)
+            ->willReturn($lesson);
 
-        $course->expects($this->exactly(2))
-            ->method('getId')
-            ->willReturn(1);
+        $this->validationService->expects($this->once())
+            ->method('validateEnrollment')
+            ->with(1, $lesson);
 
-        $this->enrollmentRepository->expects($this->once())
-            ->method('existsByUserAndCourse')
-            ->with(1, 1)
-            ->willReturn(true);
+        $this->prerequisitesService->expects($this->once())
+            ->method('checkPrerequisites')
+            ->with(1, $lesson);
 
-        $lesson->expects($this->once())
-            ->method('getOrderIndex')
-            ->willReturn(1);
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetStatus')
+            ->with('complete')
+            ->willReturn(\App\Enum\ProgressStatus::COMPLETE);
 
-        $this->lessonRepository->expects($this->once())
-            ->method('findByCourseAndOrderLessThan')
-            ->with(1, 1)
-            ->willReturn([]);
+        $this->progressFactory->expects($this->once())
+            ->method('create')
+            ->with($user, $lesson, 'test-request-123', \App\Enum\ProgressStatus::COMPLETE)
+            ->willReturn($progress);
 
         $this->entityManager->expects($this->once())
             ->method('persist')
-            ->with($this->isInstanceOf(Progress::class));
+            ->with($progress);
 
         $this->entityManager->expects($this->once())
             ->method('flush');
