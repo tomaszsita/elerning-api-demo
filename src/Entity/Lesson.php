@@ -136,5 +136,17 @@ class Lesson
         return $this;
     }
 
-
+    /**
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'content' => $this->content,
+            'order_index' => $this->orderIndex,
+            'created_at' => $this->createdAt ? $this->createdAt->format('Y-m-d H:i:s') : null,
+        ];
+    }
 }

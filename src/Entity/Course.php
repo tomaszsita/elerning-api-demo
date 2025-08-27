@@ -112,12 +112,18 @@ class Course implements \JsonSerializable
      */
     public function toArray(): array
     {
+        $lessons = [];
+        foreach ($this->lessons as $lesson) {
+            $lessons[] = $lesson->toArray();
+        }
+
         return [
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
             'max_seats' => $this->maxSeats,
             'remaining_seats' => $this->getRemainingSeats(),
+            'lessons' => $lessons,
             'created_at' => $this->createdAt ? $this->createdAt->format('Y-m-d H:i:s') : null,
         ];
     }
