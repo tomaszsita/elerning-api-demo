@@ -177,6 +177,40 @@
 - **Value objects** - Undefined `$value` property access
 - **Bootstrap** - `method_exists()` function calls
 
+## 14. Factory Pattern
+
+### Decision
+Use Factory Pattern for entity creation to improve code organization and testability.
+
+### Implemented Factories
+- `ProgressFactory` - creates Progress entities
+- `EnrollmentFactory` - creates Enrollment entities  
+- `TestDataFactory` - creates test data entities (User, Course, Lesson)
+
+### Benefits
+- Single Responsibility Principle
+- Easier testing with mocks
+- Consistent entity creation
+- Centralized creation logic
+- Better maintainability
+
+### Usage
+```php
+// Before
+$progress = new Progress();
+$progress->setUser($user);
+$progress->setLesson($lesson);
+// ... more setters
+
+// After
+$progress = $this->progressFactory->create($user, $lesson, $requestId, $status);
+```
+
+### Future Improvements
+- Add validation to factories
+- Create DTOs for factory input
+- Add factory interfaces for better abstraction
+
 **Commands:**
 - `composer phpstan` - Run static analysis
 - `composer phpstan:baseline` - Generate baseline for new errors
