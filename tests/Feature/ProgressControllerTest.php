@@ -7,7 +7,7 @@ use App\Entity\Lesson;
 use App\Entity\User;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-class ProgressControllerTest extends BaseFeatureTest
+class ProgressControllerTest extends AbstractFeature
 {
     public function testCreateProgressSuccess(): void
     {

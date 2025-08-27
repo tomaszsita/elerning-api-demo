@@ -6,7 +6,7 @@ use App\Entity\Course;
 use App\Entity\User;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-class CourseControllerTest extends BaseFeatureTest
+class CourseControllerTest extends AbstractFeature
 {
     public function testListCoursesSuccess(): void
     {

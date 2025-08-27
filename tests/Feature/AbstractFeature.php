@@ -12,8 +12,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * @coversNothing
  * @group base
+ * @group abstract
  */
-class BaseFeatureTest extends WebTestCase
+abstract class AbstractFeature extends WebTestCase
 {
     protected EntityManagerInterface $entityManager;
     protected ContainerInterface $container;

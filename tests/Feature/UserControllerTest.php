@@ -5,7 +5,7 @@ namespace App\Tests\Feature;
 use App\Entity\Course;
 use App\Entity\User;
 
-class UserControllerTest extends BaseFeatureTest
+class UserControllerTest extends AbstractFeature
 {
     public function testGetUserCoursesSuccess(): void
     {
