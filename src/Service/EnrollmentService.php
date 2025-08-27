@@ -9,25 +9,28 @@ use App\Exception\CourseFullException;
 use App\Exception\UserAlreadyEnrolledException;
 use App\Exception\UserNotFoundException;
 use App\Exception\CourseNotFoundException;
-use App\Repository\Interfaces\UserRepositoryInterface;
 use App\Repository\Interfaces\CourseRepositoryInterface;
 use App\Repository\Interfaces\EnrollmentRepositoryInterface;
+use App\Factory\EnrollmentFactory;
 use Doctrine\ORM\EntityManagerInterface;
 class EnrollmentService
 {
     public function __construct(
         EntityManagerInterface $entityManager,
         CourseRepositoryInterface $courseRepository,
-        EnrollmentRepositoryInterface $enrollmentRepository
+        EnrollmentRepositoryInterface $enrollmentRepository,
+        EnrollmentFactory $enrollmentFactory
     ) {
         $this->entityManager = $entityManager;
         $this->courseRepository = $courseRepository;
         $this->enrollmentRepository = $enrollmentRepository;
+        $this->enrollmentFactory = $enrollmentFactory;
     }
 
     private EntityManagerInterface $entityManager;
     private CourseRepositoryInterface $courseRepository;
     private EnrollmentRepositoryInterface $enrollmentRepository;
+    private EnrollmentFactory $enrollmentFactory;
 
     public function enrollUser(int $userId, int $courseId): Enrollment
     {
@@ -55,10 +58,7 @@ class EnrollmentService
                 throw new CourseFullException($courseId);
             }
 
-            $enrollment = new Enrollment();
-            $enrollment->setUser($user);
-            $enrollment->setCourse($course);
-            $enrollment->setStatus('enrolled');
+            $enrollment = $this->enrollmentFactory->create($user, $course);
 
             $this->entityManager->persist($enrollment);
             $this->entityManager->flush();

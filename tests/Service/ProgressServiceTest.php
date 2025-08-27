@@ -117,10 +117,10 @@ class ProgressServiceTest extends TestCase
             ->method('findByRequestId')
             ->willReturn(null);
 
-        $this->entityManager->expects($this->once())
-            ->method('find')
-            ->with(User::class, 999)
-            ->willReturn(null);
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetUser')
+            ->with(999)
+            ->willThrowException(new UserNotFoundException(999));
 
         $this->expectException(UserNotFoundException::class);
         $this->expectExceptionMessage('User 999 not found');
@@ -136,12 +136,15 @@ class ProgressServiceTest extends TestCase
             ->method('findByRequestId')
             ->willReturn(null);
 
-        $this->entityManager->expects($this->exactly(2))
-            ->method('find')
-            ->willReturnMap([
-                [User::class, 1, $user],
-                [Lesson::class, 999, null]
-            ]);
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetUser')
+            ->with(1)
+            ->willReturn($user);
+
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetLesson')
+            ->with(999)
+            ->willThrowException(new LessonNotFoundException(999));
 
         $this->expectException(LessonNotFoundException::class);
         $this->expectExceptionMessage('Lesson 999 not found');
@@ -153,31 +156,25 @@ class ProgressServiceTest extends TestCase
     {
         $user = $this->createMock(User::class);
         $lesson = $this->createMock(Lesson::class);
-        $course = $this->createMock(Course::class);
 
         $this->progressRepository->expects($this->once())
             ->method('findByRequestId')
             ->willReturn(null);
 
-        $this->entityManager->expects($this->exactly(2))
-            ->method('find')
-            ->willReturnMap([
-                [User::class, 1, $user],
-                [Lesson::class, 1, $lesson]
-            ]);
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetUser')
+            ->with(1)
+            ->willReturn($user);
 
-        $lesson->expects($this->exactly(2))
-            ->method('getCourse')
-            ->willReturn($course);
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetLesson')
+            ->with(1)
+            ->willReturn($lesson);
 
-        $course->expects($this->exactly(2))
-            ->method('getId')
-            ->willReturn(1);
-
-        $this->enrollmentRepository->expects($this->once())
-            ->method('existsByUserAndCourse')
-            ->with(1, 1)
-            ->willReturn(false);
+        $this->validationService->expects($this->once())
+            ->method('validateEnrollment')
+            ->with(1, $lesson)
+            ->willThrowException(new UserNotEnrolledException(1, 1));
 
         $this->expectException(UserNotEnrolledException::class);
 
@@ -188,62 +185,29 @@ class ProgressServiceTest extends TestCase
     {
         $user = $this->createMock(User::class);
         $lesson = $this->createMock(Lesson::class);
-        $course = $this->createMock(Course::class);
-        $prerequisiteLesson = $this->createMock(Lesson::class);
 
         $this->progressRepository->expects($this->once())
             ->method('findByRequestId')
             ->willReturn(null);
 
-        $this->entityManager->expects($this->exactly(2))
-            ->method('find')
-            ->willReturnMap([
-                [User::class, 1, $user],
-                [Lesson::class, 1, $lesson]
-            ]);
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetUser')
+            ->with(1)
+            ->willReturn($user);
 
-        $lesson->expects($this->exactly(2))
-            ->method('getCourse')
-            ->willReturn($course);
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetLesson')
+            ->with(1)
+            ->willReturn($lesson);
 
-        $course->expects($this->exactly(2))
-            ->method('getId')
-            ->willReturn(1);
+        $this->validationService->expects($this->once())
+            ->method('validateEnrollment')
+            ->with(1, $lesson);
 
-        $this->enrollmentRepository->expects($this->once())
-            ->method('existsByUserAndCourse')
-            ->with(1, 1)
-            ->willReturn(true);
-
-        $lesson->expects($this->once())
-            ->method('getOrderIndex')
-            ->willReturn(2);
-
-        $this->lessonRepository->expects($this->once())
-            ->method('findByCourseAndOrderLessThan')
-            ->with(1, 2)
-            ->willReturn([$prerequisiteLesson]);
-
-        $prerequisiteLesson->expects($this->once())
-            ->method('getId')
-            ->willReturn(1);
-
-        $prerequisiteLesson->expects($this->once())
-            ->method('getTitle')
-            ->willReturn('Prerequisite Lesson');
-
-        $lesson->expects($this->once())
-            ->method('getTitle')
-            ->willReturn('Current Lesson');
-
-        $lesson->expects($this->once())
-            ->method('getId')
-            ->willReturn(2);
-
-        $this->progressRepository->expects($this->once())
-            ->method('findByUserAndLesson')
-            ->with(1, 1)
-            ->willReturn(null);
+        $this->prerequisitesService->expects($this->once())
+            ->method('checkPrerequisites')
+            ->with(1, $lesson)
+            ->willThrowException(new PrerequisitesNotMetException(1, 1, 'Prerequisites not met'));
 
         $this->expectException(PrerequisitesNotMetException::class);
 
@@ -257,9 +221,9 @@ class ProgressServiceTest extends TestCase
         $user = $this->createMock(User::class);
         $expectedProgress = [new Progress()];
 
-        $this->entityManager->expects($this->once())
-            ->method('find')
-            ->with(User::class, 1)
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetUser')
+            ->with(1)
             ->willReturn($user);
 
         $this->progressRepository->expects($this->once())
@@ -274,10 +238,10 @@ class ProgressServiceTest extends TestCase
 
     public function testGetUserProgressUserNotFound(): void
     {
-        $this->entityManager->expects($this->once())
-            ->method('find')
-            ->with(User::class, 999)
-            ->willReturn(null);
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetUser')
+            ->with(999)
+            ->willThrowException(new UserNotFoundException(999));
 
         $this->expectException(UserNotFoundException::class);
 

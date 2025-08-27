@@ -13,27 +13,29 @@ use App\Repository\CourseRepository;
 use App\Repository\EnrollmentRepository;
 use App\Repository\UserRepository;
 use App\Service\EnrollmentService;
+use App\Factory\EnrollmentFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 class EnrollmentServiceTest extends TestCase
 {
     private EnrollmentService $enrollmentService;
     private EntityManagerInterface $entityManager;
-    private UserRepository $userRepository;
     private CourseRepository $courseRepository;
     private EnrollmentRepository $enrollmentRepository;
+    private EnrollmentFactory $enrollmentFactory;
 
     protected function setUp(): void
     {
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->userRepository = $this->createMock(UserRepository::class);
         $this->courseRepository = $this->createMock(CourseRepository::class);
         $this->enrollmentRepository = $this->createMock(EnrollmentRepository::class);
+        $this->enrollmentFactory = $this->createMock(EnrollmentFactory::class);
 
         $this->enrollmentService = new EnrollmentService(
             $this->entityManager,
             $this->courseRepository,
-            $this->enrollmentRepository
+            $this->enrollmentRepository,
+            $this->enrollmentFactory
         );
     }
 
@@ -71,6 +73,11 @@ class EnrollmentServiceTest extends TestCase
         $this->entityManager->expects($this->once())
             ->method('beginTransaction');
             
+        $this->enrollmentFactory->expects($this->once())
+            ->method('create')
+            ->with($user, $course)
+            ->willReturn($this->createMock(Enrollment::class));
+
         $this->entityManager->expects($this->once())
             ->method('persist')
             ->with($this->isInstanceOf(Enrollment::class));

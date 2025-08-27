@@ -5,8 +5,7 @@ namespace App\Command;
 use App\Entity\Course;
 use App\Entity\Lesson;
 use App\Entity\User;
-use App\Repository\Interfaces\CourseRepositoryInterface;
-use App\Repository\Interfaces\UserRepositoryInterface;
+use App\Factory\TestDataFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -18,13 +17,16 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class LoadTestDataCommand extends Command
 {
     public function __construct(
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        TestDataFactory $testDataFactory
     ) {
         parent::__construct();
         $this->entityManager = $entityManager;
+        $this->testDataFactory = $testDataFactory;
     }
 
     private EntityManagerInterface $entityManager;
+    private TestDataFactory $testDataFactory;
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -70,9 +72,7 @@ class LoadTestDataCommand extends Command
         ];
 
         foreach ($userData as $data) {
-            $user = new User();
-            $user->setEmail($data['email']);
-            $user->setName($data['name']);
+            $user = $this->testDataFactory->createUser($data['name'], $data['email']);
             
             $this->entityManager->persist($user);
             $users[] = $user;
@@ -126,20 +126,22 @@ class LoadTestDataCommand extends Command
         ];
 
         foreach ($courseData as $data) {
-            $course = new Course();
-            $course->setTitle($data['title']);
-            $course->setDescription($data['description']);
-            $course->setMaxSeats($data['maxSeats']);
+            $course = $this->testDataFactory->createCourse(
+                $data['title'],
+                $data['description'],
+                $data['maxSeats']
+            );
             
             $this->entityManager->persist($course);
             
             // Create lessons for this course
             foreach ($data['lessons'] as $index => $lessonData) {
-                $lesson = new Lesson();
-                $lesson->setTitle($lessonData['title']);
-                $lesson->setContent($lessonData['content']);
-                $lesson->setOrderIndex($index + 1);
-                $lesson->setCourse($course);
+                $lesson = $this->testDataFactory->createLesson(
+                    $lessonData['title'],
+                    $lessonData['content'],
+                    $index + 1,
+                    $course
+                );
                 
                 $this->entityManager->persist($lesson);
             }
