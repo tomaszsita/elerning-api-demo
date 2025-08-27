@@ -36,7 +36,7 @@ class ProgressSummaryCommand extends Command
         $courseId = (int) $input->getArgument('courseId');
 
         try {
-            $course = $this->progressService->getCourse($courseId);
+            $course = $this->validationService->validateAndGetCourse($courseId);
             $progressList = $this->progressService->getUserProgress($userId, $courseId);
             
             $totalLessons = count($course->getLessons());

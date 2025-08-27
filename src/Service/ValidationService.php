@@ -2,9 +2,11 @@
 
 namespace App\Service;
 
+use App\Entity\Course;
 use App\Entity\User;
 use App\Entity\Lesson;
 use App\Enum\ProgressStatus;
+use App\Exception\CourseNotFoundException;
 use App\Exception\UserNotFoundException;
 use App\Exception\LessonNotFoundException;
 use App\Exception\InvalidStatusTransitionException;
@@ -40,6 +42,15 @@ class ValidationService
             throw new LessonNotFoundException($lessonId);
         }
         return $lesson;
+    }
+
+    public function validateAndGetCourse(int $courseId): Course
+    {
+        $course = $this->entityManager->find(Course::class, $courseId);
+        if (!$course) {
+            throw new CourseNotFoundException($courseId);
+        }
+        return $course;
     }
 
     public function validateEnrollment(int $userId, Lesson $lesson): void

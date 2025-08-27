@@ -86,14 +86,7 @@ class ProgressService
         $this->eventDispatcher->dispatch($event, ProgressChangedEvent::NAME);
     }
 
-    public function getCourse(int $courseId): \App\Entity\Course
-    {
-        $course = $this->entityManager->find(\App\Entity\Course::class, $courseId);
-        if (!$course) {
-            throw new \App\Exception\CourseNotFoundException($courseId);
-        }
-        return $course;
-    }
+
 
     /**
      * @return \App\Entity\ProgressHistory[]
@@ -106,6 +99,35 @@ class ProgressService
         /** @var \App\Repository\ProgressHistoryRepository $repository */
         $repository = $this->entityManager->getRepository(\App\Entity\ProgressHistory::class);
         return $repository->findByUserAndLesson($userId, $lessonId);
+    }
+
+    public function getUserProgressSummary(int $userId, int $courseId): array
+    {
+        $this->validationService->validateAndGetUser($userId);
+        $course = $this->validationService->validateAndGetCourse($courseId);
+        
+        $progressList = $this->getUserProgress($userId, $courseId);
+        $totalLessons = count($course->getLessons());
+        $completedLessons = count(array_filter($progressList, fn($p) => $p->getStatus()->value === 'complete'));
+        $percent = $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
+
+        $lessonsData = [];
+        foreach ($course->getLessons() as $lesson) {
+            $progress = array_filter($progressList, fn($p) => $p->getLesson()->getId() === $lesson->getId());
+            $status = empty($progress) ? 'pending' : reset($progress)->getStatus()->value;
+            
+            $lessonsData[] = [
+                'id' => $lesson->getId(),
+                'status' => $status
+            ];
+        }
+
+        return [
+            'completed' => $completedLessons,
+            'total' => $totalLessons,
+            'percent' => $percent,
+            'lessons' => $lessonsData
+        ];
     }
 
     public function deleteProgress(int $userId, int $lessonId): void
