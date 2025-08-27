@@ -14,12 +14,14 @@ class ProgressControllerTest extends BaseFeatureTest
         $course = $this->getTestCourse();
         $lesson = $this->getTestLesson();
 
-        $this->client->request('POST', '/enrollments', [], [], [
+        // Enroll user in course first
+        $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
             'user_id' => $user->getId(),
-            'course_id' => $course->getId(),
         ]));
+
+        $this->assertResponseStatusCodeSame(201);
 
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
@@ -48,11 +50,10 @@ class ProgressControllerTest extends BaseFeatureTest
         $lesson = $this->getTestLesson();
         $requestId = 'idempotency-test-123';
 
-        $this->client->request('POST', '/enrollments', [], [], [
+        $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
             'user_id' => $user->getId(),
-            'course_id' => $course->getId(),
         ]));
 
         $this->client->request('POST', '/progress', [], [], [
@@ -157,11 +158,10 @@ class ProgressControllerTest extends BaseFeatureTest
         $course = $this->getTestCourse();
         $lesson = $this->getTestLesson();
 
-        $this->client->request('POST', '/enrollments', [], [], [
+        $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
             'user_id' => $user->getId(),
-            'course_id' => $course->getId(),
         ]));
 
         $this->client->request('POST', '/progress', [], [], [
@@ -173,71 +173,21 @@ class ProgressControllerTest extends BaseFeatureTest
         ]));
 
 
-        $this->client->request('GET', '/progress?user_id=' . $user->getId() . '&course_id=' . $course->getId());
+        $this->client->request('GET', '/progress/' . $user->getId() . '/courses/' . $course->getId());
 
         $this->assertResponseStatusCodeSame(200);
         
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('progress', $responseData);
-        $this->assertNotEmpty($responseData['progress']);
+        $this->assertArrayHasKey('completed', $responseData);
+        $this->assertArrayHasKey('total', $responseData);
+        $this->assertArrayHasKey('percent', $responseData);
+        $this->assertArrayHasKey('lessons', $responseData);
         
-        $progress = $responseData['progress'][0];
-        $this->assertEquals($user->getId(), $progress['user_id']);
-        $this->assertEquals($lesson->getId(), $progress['lesson_id']);
-        $this->assertEquals('Test Lesson', $progress['lesson_title']);
-        $this->assertEquals('complete', $progress['status']);
-        $this->assertEquals('test-request-456', $progress['request_id']);
+        $this->assertEquals(1, $responseData['completed']);
+        $this->assertEquals(1, $responseData['total']);
+        $this->assertEquals(100, $responseData['percent']);
+        $this->assertNotEmpty($responseData['lessons']);
     }
 
-    public function testGetUserProgressMissingUserId(): void
-    {
-        $course = $this->getTestCourse();
 
-        $this->client->request('GET', '/progress?course_id=' . $course->getId());
-
-        $this->assertResponseStatusCodeSame(400);
-        
-        $responseData = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('error', $responseData);
-        $this->assertStringContainsString('user_id parameter is required', $responseData['error']);
-    }
-
-    public function testGetUserProgressMissingCourseId(): void
-    {
-        $user = $this->getTestUser();
-
-        $this->client->request('GET', '/progress?user_id=' . $user->getId());
-
-        $this->assertResponseStatusCodeSame(400);
-        
-        $responseData = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('error', $responseData);
-        $this->assertStringContainsString('course_id parameter is required', $responseData['error']);
-    }
-
-    public function testGetUserProgressInvalidUserId(): void
-    {
-        $course = $this->getTestCourse();
-
-        $this->client->request('GET', '/progress?user_id=invalid&course_id=' . $course->getId());
-
-        $this->assertResponseStatusCodeSame(400);
-        
-        $responseData = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('error', $responseData);
-        $this->assertStringContainsString('user_id parameter is required and must be numeric', $responseData['error']);
-    }
-
-    public function testGetUserProgressInvalidCourseId(): void
-    {
-        $user = $this->getTestUser();
-
-        $this->client->request('GET', '/progress?user_id=' . $user->getId() . '&course_id=invalid');
-
-        $this->assertResponseStatusCodeSame(400);
-        
-        $responseData = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('error', $responseData);
-        $this->assertStringContainsString('course_id parameter is required and must be numeric', $responseData['error']);
-    }
 }

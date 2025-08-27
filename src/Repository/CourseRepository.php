@@ -39,4 +39,31 @@ class CourseRepository extends ServiceEntityRepository implements CourseReposito
         $this->getEntityManager()->persist($course);
         $this->getEntityManager()->flush();
     }
+
+    /**
+     * @return Course[]
+     */
+    public function findByUser(int $userId): array
+    {
+        return $this->createQueryBuilder('c')
+            ->join('c.enrollments', 'e')
+            ->where('e.user = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Course[]
+     */
+    public function findAllWithRemainingSeats(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->select('c')
+            ->leftJoin('c.enrollments', 'e')
+            ->groupBy('c.id')
+            ->having('COUNT(e.id) < c.maxSeats')
+            ->getQuery()
+            ->getResult();
+    }
 }

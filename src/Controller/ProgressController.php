@@ -57,24 +57,41 @@ class ProgressController
         return new JsonResponse($progress->toArray(), Response::HTTP_CREATED);
     }
 
-    #[Route('', methods: ['GET'])]
-    public function getUserProgress(Request $request): JsonResponse
+    #[Route('/{user_id}/courses/{course_id}', methods: ['GET'])]
+    public function getUserProgress(int $user_id, int $course_id): JsonResponse
     {
-        $userId = $request->query->get('user_id');
-        $courseId = $request->query->get('course_id');
+        $progressList = $this->progressService->getUserProgress($user_id, $course_id);
         
-        if (!$userId || !is_numeric($userId)) {
-            return new JsonResponse(['error' => 'user_id parameter is required and must be numeric'], Response::HTTP_BAD_REQUEST);
+        // Get course to count total lessons
+        $course = $this->progressService->getCourse($course_id);
+        $totalLessons = count($course->getLessons());
+        $completedLessons = count(array_filter($progressList, fn($p) => $p->getStatus()->value === 'complete'));
+        $percent = $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
+
+        $lessonsData = [];
+        foreach ($course->getLessons() as $lesson) {
+            $progress = array_filter($progressList, fn($p) => $p->getLesson()->getId() === $lesson->getId());
+            $status = empty($progress) ? 'pending' : reset($progress)->getStatus()->value;
+            
+            $lessonsData[] = [
+                'id' => $lesson->getId(),
+                'status' => $status
+            ];
         }
 
-        if (!$courseId || !is_numeric($courseId)) {
-            return new JsonResponse(['error' => 'course_id parameter is required and must be numeric'], Response::HTTP_BAD_REQUEST);
-        }
+        return new JsonResponse([
+            'completed' => $completedLessons,
+            'total' => $totalLessons,
+            'percent' => $percent,
+            'lessons' => $lessonsData
+        ], Response::HTTP_OK);
+    }
 
-        $progressList = $this->progressService->getUserProgress((int) $userId, (int) $courseId);
-
-                    $progressData = array_map(fn($progress) => $progress->toArray(), $progressList);
-
-        return new JsonResponse(['progress' => $progressData], Response::HTTP_OK);
+    #[Route('/{user_id}/lessons/{lesson_id}', methods: ['DELETE'])]
+    public function deleteProgress(int $user_id, int $lesson_id): JsonResponse
+    {
+        $this->progressService->deleteProgress($user_id, $lesson_id);
+        
+        return new JsonResponse([], Response::HTTP_NO_CONTENT);
     }
 }

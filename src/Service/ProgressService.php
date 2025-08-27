@@ -61,4 +61,22 @@ class ProgressService
         $this->entityManager->persist($progress);
         $this->entityManager->flush();
     }
+
+    public function getCourse(int $courseId): \App\Entity\Course
+    {
+        $course = $this->entityManager->find(\App\Entity\Course::class, $courseId);
+        if (!$course) {
+            throw new \App\Exception\CourseNotFoundException($courseId);
+        }
+        return $course;
+    }
+
+    public function deleteProgress(int $userId, int $lessonId): void
+    {
+        $progress = $this->progressRepository->findByUserAndLesson($userId, $lessonId);
+        if ($progress) {
+            $this->entityManager->remove($progress);
+            $this->entityManager->flush();
+        }
+    }
 }
