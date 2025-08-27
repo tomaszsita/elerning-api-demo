@@ -11,7 +11,7 @@ Instead of directly saving progress history in the service, I used Symfony's Eve
 **Trade-off**: Bit more complex setup, but much cleaner separation of concerns.
 
 ### Factory Pattern
-Created factories for Progress, Enrollment, and test data. Makes testing easier with proper DI and keeps entity creation logic in one place.
+Created factories for Progress, Enrollment, ProgressHistory, ProgressChangedEvent, and test data. Makes testing easier with proper DI and keeps entity creation logic in one place.
 
 **Trade-off**: More files, but services are cleaner and more testable.
 

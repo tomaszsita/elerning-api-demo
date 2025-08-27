@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Progress;
 use App\Event\ProgressChangedEvent;
 use App\Factory\ProgressFactory;
+use App\Factory\ProgressChangedEventFactory;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -16,7 +17,8 @@ class ProgressService
         ProgressFactory $progressFactory,
         ProgressRepositoryInterface $progressRepository,
         EntityManagerInterface $entityManager,
-        EventDispatcherInterface $eventDispatcher
+        EventDispatcherInterface $eventDispatcher,
+        ProgressChangedEventFactory $progressChangedEventFactory
     ) {
         $this->validationService = $validationService;
         $this->prerequisitesService = $prerequisitesService;
@@ -24,6 +26,7 @@ class ProgressService
         $this->progressRepository = $progressRepository;
         $this->entityManager = $entityManager;
         $this->eventDispatcher = $eventDispatcher;
+        $this->progressChangedEventFactory = $progressChangedEventFactory;
     }
 
     private ValidationService $validationService;
@@ -32,6 +35,7 @@ class ProgressService
     private ProgressRepositoryInterface $progressRepository;
     private EntityManagerInterface $entityManager;
     private EventDispatcherInterface $eventDispatcher;
+    private ProgressChangedEventFactory $progressChangedEventFactory;
 
     public function createProgress(int $userId, int $lessonId, string $requestId, string $status = 'complete'): Progress
     {
@@ -69,7 +73,8 @@ class ProgressService
 
     private function updateProgressStatus(Progress $progress, \App\Enum\ProgressStatus $newStatus, ?string $requestId = null): void
     {
-        $oldStatus = $progress->getStatus() ? $progress->getStatus()->value : null;
+        $currentStatus = $progress->getStatus();
+        $oldStatus = $currentStatus ? $currentStatus->value : null;
         
         $progress->setStatus($newStatus);
         
@@ -82,7 +87,7 @@ class ProgressService
         $this->entityManager->flush();
 
         // Dispatch event for history tracking
-        $event = new ProgressChangedEvent($progress, $oldStatus, $newStatus->value, $requestId);
+        $event = $this->progressChangedEventFactory->create($progress, $oldStatus, $newStatus->value, $requestId);
         $this->eventDispatcher->dispatch($event, ProgressChangedEvent::NAME);
     }
 
@@ -101,6 +106,9 @@ class ProgressService
         return $repository->findByUserAndLesson($userId, $lessonId);
     }
 
+    /**
+     * @return array{completed: int, total: int, percent: int, lessons: array<int, array{id: int, status: string}>}
+     */
     public function getUserProgressSummary(int $userId, int $courseId): array
     {
         $this->validationService->validateAndGetUser($userId);

@@ -36,14 +36,9 @@ class ProgressSummaryCommand extends Command
         $courseId = (int) $input->getArgument('courseId');
 
         try {
-            $course = $this->validationService->validateAndGetCourse($courseId);
-            $progressList = $this->progressService->getUserProgress($userId, $courseId);
+            $summary = $this->progressService->getUserProgressSummary($userId, $courseId);
             
-            $totalLessons = count($course->getLessons());
-            $completedLessons = count(array_filter($progressList, fn($p) => $p->getStatus()->value === 'complete'));
-            $percent = $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
-
-            $io->text(sprintf('%d/%d (%d%%)', $completedLessons, $totalLessons, $percent));
+            $io->text(sprintf('%d/%d (%d%%)', $summary['completed'], $summary['total'], $summary['percent']));
 
             return Command::SUCCESS;
         } catch (\Exception $e) {

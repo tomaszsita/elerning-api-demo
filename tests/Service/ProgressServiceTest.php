@@ -16,6 +16,7 @@ use App\Service\ProgressService;
 use App\Service\ValidationService;
 use App\Service\PrerequisitesService;
 use App\Factory\ProgressFactory;
+use App\Factory\ProgressChangedEventFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use PHPUnit\Framework\TestCase;
@@ -29,6 +30,7 @@ class ProgressServiceTest extends TestCase
     private ProgressRepositoryInterface $progressRepository;
     private EntityManagerInterface $entityManager;
     private EventDispatcherInterface $eventDispatcher;
+    private ProgressChangedEventFactory $progressChangedEventFactory;
 
     protected function setUp(): void
     {
@@ -38,6 +40,7 @@ class ProgressServiceTest extends TestCase
         $this->progressRepository = $this->createMock(ProgressRepositoryInterface::class);
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $this->progressChangedEventFactory = $this->createMock(ProgressChangedEventFactory::class);
 
         $this->progressService = new ProgressService(
             $this->validationService,
@@ -45,7 +48,8 @@ class ProgressServiceTest extends TestCase
             $this->progressFactory,
             $this->progressRepository,
             $this->entityManager,
-            $this->eventDispatcher
+            $this->eventDispatcher,
+            $this->progressChangedEventFactory
         );
     }
 
@@ -251,5 +255,32 @@ class ProgressServiceTest extends TestCase
         $this->progressService->getUserProgress(999, 1);
     }
 
+    public function testDeleteProgressSuccess(): void
+    {
+        $progress = $this->createMock(Progress::class);
+        $event = $this->createMock(\App\Event\ProgressChangedEvent::class);
+
+        $progress->expects($this->exactly(2))
+            ->method('getStatus')
+            ->willReturn(\App\Enum\ProgressStatus::COMPLETE);
+
+        $this->progressRepository->expects($this->once())
+            ->method('findByUserAndLesson')
+            ->with(1, 1)
+            ->willReturn($progress);
+
+        $this->progressChangedEventFactory->expects($this->once())
+            ->method('create')
+            ->willReturn($event);
+
+        $this->eventDispatcher->expects($this->once())
+            ->method('dispatch')
+            ->with($event, \App\Event\ProgressChangedEvent::NAME);
+
+        $this->entityManager->expects($this->once())
+            ->method('flush');
+
+        $this->progressService->deleteProgress(1, 1);
+    }
 
 }
