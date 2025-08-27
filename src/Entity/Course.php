@@ -117,6 +117,7 @@ class Course implements \JsonSerializable
             'title' => $this->title,
             'description' => $this->description,
             'max_seats' => $this->maxSeats,
+            'remaining_seats' => $this->getRemainingSeats(),
             'created_at' => $this->createdAt ? $this->createdAt->format('Y-m-d H:i:s') : null,
         ];
     }
