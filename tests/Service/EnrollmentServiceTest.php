@@ -53,7 +53,7 @@ class EnrollmentServiceTest extends TestCase
             ->willReturnMap([
                 [User::class, $userId, null, null, $user],
                 [Course::class, $courseId, null, null, $course],
-                [Course::class, $courseId, null, null, $course]
+                [Course::class, $courseId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE, null, $course]
             ]);
             
         $this->enrollmentRepository->expects($this->once())
@@ -70,6 +70,9 @@ class EnrollmentServiceTest extends TestCase
             ->method('getMaxSeats')
             ->willReturn(20);
             
+        $this->entityManager->expects($this->once())
+            ->method('beginTransaction');
+            
         $this->enrollmentFactory->expects($this->once())
             ->method('create')
             ->with($user, $course)
@@ -81,6 +84,9 @@ class EnrollmentServiceTest extends TestCase
             
         $this->entityManager->expects($this->once())
             ->method('flush');
+            
+        $this->entityManager->expects($this->once())
+            ->method('commit');
 
         // Act
         $result = $this->enrollmentService->enrollUser($userId, $courseId);
@@ -165,7 +171,7 @@ class EnrollmentServiceTest extends TestCase
             ->willReturnMap([
                 [User::class, $userId, null, null, $user],
                 [Course::class, $courseId, null, null, $course],
-                [Course::class, $courseId, null, null, $course]
+                [Course::class, $courseId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE, null, $course]
             ]);
             
         $this->enrollmentRepository->expects($this->once())
@@ -181,6 +187,12 @@ class EnrollmentServiceTest extends TestCase
         $course->expects($this->once())
             ->method('getMaxSeats')
             ->willReturn(20);
+            
+        $this->entityManager->expects($this->once())
+            ->method('beginTransaction');
+            
+        $this->entityManager->expects($this->atLeastOnce())
+            ->method('rollback');
             
 
             

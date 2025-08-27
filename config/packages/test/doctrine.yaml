@@ -2,6 +2,3 @@ doctrine:
     dbal:
         # Disable dbname_suffix for test environment
         dbname_suffix: null
-    orm:
-        auto_generate_proxy_classes: true
-        enable_lazy_ghost_objects: true

@@ -49,21 +49,36 @@ class EnrollmentService
         }
 
         // Use pessimistic locking for concurrent enrollment safety
-        // In test environment, use regular find to avoid transaction issues
-        $isTestEnvironment = defined('PHPUNIT_COMPOSER_INSTALL') || getenv('APP_ENV') === 'test';
-        $lockMode = $isTestEnvironment ? null : \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE;
-        $course = $this->entityManager->find(Course::class, $courseId, $lockMode);
+        $connection = $this->entityManager->getConnection();
+        $wasInTransaction = $connection->isTransactionActive();
         
-        $enrollmentCount = $this->courseRepository->countEnrollmentsByCourse($courseId);
-        if ($enrollmentCount >= $course->getMaxSeats()) {
-            throw new CourseFullException($courseId);
+        if (!$wasInTransaction) {
+            $this->entityManager->beginTransaction();
         }
+        
+        try {
+            $course = $this->entityManager->find(Course::class, $courseId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE);
+            
+            $enrollmentCount = $this->courseRepository->countEnrollmentsByCourse($courseId);
+            if ($enrollmentCount >= $course->getMaxSeats()) {
+                throw new CourseFullException($courseId);
+            }
 
-        $enrollment = $this->enrollmentFactory->create($user, $course);
-        $this->entityManager->persist($enrollment);
-        $this->entityManager->flush();
+            $enrollment = $this->enrollmentFactory->create($user, $course);
+            $this->entityManager->persist($enrollment);
+            $this->entityManager->flush();
+            
+            if (!$wasInTransaction) {
+                $this->entityManager->commit();
+            }
 
-        return $enrollment;
+            return $enrollment;
+        } catch (\Exception $e) {
+            if (!$wasInTransaction) {
+                $this->entityManager->rollback();
+            }
+            throw $e;
+        }
     }
 
     /**

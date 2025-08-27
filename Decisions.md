@@ -34,7 +34,7 @@ Chose to reset progress to 'pending' instead of deleting records. This preserves
 **Trade-off**: Slightly more complex, but business value of keeping history outweighs the complexity.
 
 ### Transactions
-EnrollmentService uses pessimistic locking for concurrent enrollment safety in production. In test environment, uses regular find() without locking to avoid transaction issues.
+EnrollmentService uses pessimistic locking with proper transaction management for concurrent enrollment safety. Checks for existing transactions to avoid nested transaction issues.
 
 ## Requirements Coverage
 
