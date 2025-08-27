@@ -9,7 +9,7 @@ class HttpExceptionMapping
         InvalidStatusTransitionException::class => 400,
         UserAlreadyEnrolledException::class => 400,
         UserNotEnrolledException::class => 400,
-        PrerequisitesNotMetException::class => 400,
+        PrerequisitesNotMetException::class => 409,
         
         // 404 Not Found - Resource not found
         UserNotFoundException::class => 404,

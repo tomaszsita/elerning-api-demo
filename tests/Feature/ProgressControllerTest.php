@@ -189,5 +189,48 @@ class ProgressControllerTest extends BaseFeatureTest
         $this->assertNotEmpty($responseData['lessons']);
     }
 
+    public function testDeleteProgressSuccess(): void
+    {
+        $user = $this->getTestUser();
+        $course = $this->getTestCourse();
+        $lesson = $this->getTestLesson();
+
+        // Enroll user in course first
+        $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'user_id' => $user->getId(),
+        ]));
+
+        $this->assertResponseStatusCodeSame(201);
+
+        // Create progress
+        $this->client->request('POST', '/progress', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'user_id' => $user->getId(),
+            'lesson_id' => $lesson->getId(),
+            'request_id' => 'test-delete-123',
+        ]));
+
+        $this->assertResponseStatusCodeSame(201);
+
+        // Delete progress
+        $this->client->request('DELETE', '/progress/' . $user->getId() . '/lessons/' . $lesson->getId());
+
+        $this->assertResponseStatusCodeSame(204);
+    }
+
+    public function testDeleteProgressNotFound(): void
+    {
+        $user = $this->getTestUser();
+        $lesson = $this->getTestLesson();
+
+        // Try to delete non-existent progress
+        $this->client->request('DELETE', '/progress/' . $user->getId() . '/lessons/' . $lesson->getId());
+
+        $this->assertResponseStatusCodeSame(204); // Should return 204 even if not found
+    }
+
 
 }
