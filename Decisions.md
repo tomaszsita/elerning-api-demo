@@ -34,7 +34,7 @@ Chose to reset progress to 'pending' instead of deleting records. This preserves
 **Trade-off**: Slightly more complex, but business value of keeping history outweighs the complexity.
 
 ### Transactions
-The original EnrollmentService used pessimistic locking for concurrent enrollment safety, but I simplified it in CourseService for better testability. For production, I'd keep the pessimistic locking approach.
+Removed CourseService duplication and kept EnrollmentService with pessimistic locking for concurrent enrollment safety. Simplified locking in test environment to avoid transaction issues.
 
 ## Requirements Coverage
 

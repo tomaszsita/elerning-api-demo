@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Service\CourseService;
+use App\Service\EnrollmentService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -10,17 +10,17 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/courses')]
 class CourseController
 {
-    private CourseService $courseService;
+    private EnrollmentService $enrollmentService;
 
-    public function __construct(CourseService $courseService)
+    public function __construct(EnrollmentService $enrollmentService)
     {
-        $this->courseService = $courseService;
+        $this->enrollmentService = $enrollmentService;
     }
 
     #[Route('', methods: ['GET'])]
     public function listCourses(): JsonResponse
     {
-        $courses = $this->courseService->getAllCoursesWithRemainingSeats();
+        $courses = $this->enrollmentService->getAllCoursesWithRemainingSeats();
         
         $coursesData = array_map(fn($course) => $course->toArray(), $courses);
         
@@ -42,7 +42,7 @@ class CourseController
             return new JsonResponse(['error' => 'user_id is required and must be numeric'], Response::HTTP_BAD_REQUEST);
         }
 
-        $enrollment = $this->courseService->enrollUserInCourse((int) $userId, $id);
+        $enrollment = $this->enrollmentService->enrollUser((int) $userId, $id);
 
         return new JsonResponse($enrollment->toArray(), Response::HTTP_CREATED);
     }

@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Service\CourseService;
+use App\Service\EnrollmentService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -10,17 +10,18 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/users')]
 class UserController
 {
-    private CourseService $courseService;
+    private EnrollmentService $enrollmentService;
 
-    public function __construct(CourseService $courseService)
+    public function __construct(EnrollmentService $enrollmentService)
     {
-        $this->courseService = $courseService;
+        $this->enrollmentService = $enrollmentService;
     }
 
     #[Route('/{id}/courses', methods: ['GET'])]
     public function getUserCourses(int $id): JsonResponse
     {
-        $courses = $this->courseService->getUserCourses($id);
+        $enrollments = $this->enrollmentService->getUserEnrollments($id);
+        $courses = array_map(fn($enrollment) => $enrollment->getCourse(), $enrollments);
         
         $coursesData = array_map(fn($course) => $course->toArray(), $courses);
         
