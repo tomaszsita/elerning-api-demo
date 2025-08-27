@@ -6,23 +6,37 @@ use App\Exception\HttpExceptionMapping;
 use App\Exception\InvalidStatusTransitionException;
 use App\Exception\UserNotFoundException;
 use App\Exception\CourseFullException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class HttpExceptionMappingTest extends TestCase
 {
-    public function testGetStatusCode(): void
+    #[DataProvider('statusCodeProvider')]
+    public function testGetStatusCode(\Exception $exception, int $expectedStatusCode): void
     {
-        $this->assertEquals(400, HttpExceptionMapping::getStatusCode(
-            new InvalidStatusTransitionException('pending', 'invalid')
-        ));
+        $this->assertEquals($expectedStatusCode, HttpExceptionMapping::getStatusCode($exception));
+    }
 
-        $this->assertEquals(404, HttpExceptionMapping::getStatusCode(
-            new UserNotFoundException(123)
-        ));
-
-        $this->assertEquals(409, HttpExceptionMapping::getStatusCode(
-            new CourseFullException(456)
-        ));
+    public static function statusCodeProvider(): array
+    {
+        return [
+            'InvalidStatusTransitionException returns 400' => [
+                new InvalidStatusTransitionException('pending', 'invalid'),
+                400
+            ],
+            'UserNotFoundException returns 404' => [
+                new UserNotFoundException(123),
+                404
+            ],
+            'CourseFullException returns 409' => [
+                new CourseFullException(456),
+                409
+            ],
+            'Unknown exception returns 500' => [
+                new \Exception('Unknown error'),
+                500
+            ],
+        ];
     }
 
     public function testGetErrorMessage(): void
@@ -32,13 +46,4 @@ class HttpExceptionMappingTest extends TestCase
         
         $this->assertEquals($expectedMessage, HttpExceptionMapping::getErrorMessage($exception));
     }
-
-    public function testUnknownExceptionReturns500(): void
-    {
-        $exception = new \Exception('Unknown error');
-        
-        $this->assertEquals(500, HttpExceptionMapping::getStatusCode($exception));
-    }
-
-
 }

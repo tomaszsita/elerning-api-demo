@@ -4,6 +4,7 @@ namespace App\Tests\Feature;
 
 use App\Entity\Course;
 use App\Entity\User;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class CourseControllerTest extends BaseFeatureTest
 {
@@ -47,85 +48,73 @@ class CourseControllerTest extends BaseFeatureTest
         $this->assertEquals('enrolled', $responseData['status']);
     }
 
-    public function testEnrollInCourseInvalidJson(): void
+    #[DataProvider('enrollmentValidationProvider')]
+    public function testEnrollInCourseValidationErrors(string $testCase, string $requestBody, string $expectedError): void
     {
         $course = $this->getTestCourse();
 
         $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
             'CONTENT_TYPE' => 'application/json',
-        ], 'invalid json');
+        ], $requestBody);
 
         $this->assertResponseStatusCodeSame(400);
         
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('error', $responseData);
-        $this->assertEquals('Invalid JSON', $responseData['error']);
+        $this->assertStringContainsString($expectedError, $responseData['error']);
     }
 
-    public function testEnrollInCourseMissingUserId(): void
+    public static function enrollmentValidationProvider(): array
     {
-        $course = $this->getTestCourse();
-
-        $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
-            'CONTENT_TYPE' => 'application/json',
-        ], json_encode([]));
-
-        $this->assertResponseStatusCodeSame(400);
-        
-        $responseData = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('error', $responseData);
-        $this->assertStringContainsString('user_id is required', $responseData['error']);
+        return [
+            'invalid json' => [
+                'Invalid JSON',
+                'invalid json',
+                'Invalid JSON'
+            ],
+            'missing user_id' => [
+                'Missing user_id',
+                json_encode([]),
+                'user_id is required'
+            ],
+            'invalid user_id type' => [
+                'Invalid user_id type',
+                json_encode(['user_id' => 'invalid']),
+                'user_id is required and must be numeric'
+            ],
+        ];
     }
 
-    public function testEnrollInCourseInvalidUserId(): void
+    #[DataProvider('enrollmentNotFoundProvider')]
+    public function testEnrollInCourseNotFound(string $entityType, int $invalidId, string $expectedError): void
     {
-        $course = $this->getTestCourse();
+        if ($entityType === 'user') {
+            $course = $this->getTestCourse();
+            $requestData = ['user_id' => $invalidId];
+        } else {
+            $user = $this->getTestUser();
+            $requestData = ['user_id' => $user->getId()];
+        }
 
-        $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
+        $courseId = $entityType === 'user' ? $course->getId() : $invalidId;
+
+        $this->client->request('POST', '/courses/' . $courseId . '/enroll', [], [], [
             'CONTENT_TYPE' => 'application/json',
-        ], json_encode([
-            'user_id' => 'invalid',
-        ]));
-
-        $this->assertResponseStatusCodeSame(400);
-        
-        $responseData = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('error', $responseData);
-        $this->assertStringContainsString('user_id is required and must be numeric', $responseData['error']);
-    }
-
-    public function testEnrollInCourseUserNotFound(): void
-    {
-        $course = $this->getTestCourse();
-
-        $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
-            'CONTENT_TYPE' => 'application/json',
-        ], json_encode([
-            'user_id' => 99999,
-        ]));
+        ], json_encode($requestData));
 
         $this->assertResponseStatusCodeSame(404);
         
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('error', $responseData);
-        $this->assertStringContainsString('User 99999 not found', $responseData['error']);
+        $this->assertStringContainsString($expectedError, $responseData['error']);
     }
 
-    public function testEnrollInCourseNotFound(): void
+    public static function enrollmentNotFoundProvider(): array
     {
-        $user = $this->getTestUser();
-
-        $this->client->request('POST', '/courses/99999/enroll', [], [], [
-            'CONTENT_TYPE' => 'application/json',
-        ], json_encode([
-            'user_id' => $user->getId(),
-        ]));
-
-        $this->assertResponseStatusCodeSame(404);
-        
-        $responseData = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('error', $responseData);
-        $this->assertStringContainsString('Course 99999 not found', $responseData['error']);
+        return [
+            'user not found' => ['user', 99999, 'User 99999 not found'],
+            'course not found' => ['course', 99999, 'Course 99999 not found'],
+        ];
     }
 
     public function testEnrollInCourseAlreadyEnrolled(): void

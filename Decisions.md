@@ -132,6 +132,26 @@
 - CompletedAt timestamp is cleared on reset
 - Both completed and failed progress can be reset to allow retry
 
+### 16. Data Providers in Tests
+**Decision:** Use PHPUnit 12 data providers with attributes for better test maintainability
+**Rationale:**
+- Reduces code duplication in tests
+- Makes test cases more readable and maintainable
+- Easier to add new test scenarios
+- Better test organization and structure
+
+**Implementation:**
+- Use `#[DataProvider('providerName')]` attributes (PHPUnit 12 syntax)
+- Data provider methods must be `static`
+- Provider methods return arrays with descriptive keys
+- Applied to: ProgressStatusTest, HttpExceptionMappingTest, ProgressControllerTest, CourseControllerTest
+
+**Benefits:**
+- Reduced test methods from 15+ to 8 in ProgressControllerTest
+- Clearer test intent with descriptive provider names
+- Easier to maintain and extend test coverage
+- Better test organization and readability
+
 ## API Design
 
 ### 9. RESTful Endpoints

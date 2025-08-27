@@ -3,67 +3,94 @@
 namespace App\Tests\Enum;
 
 use App\Enum\ProgressStatus;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class ProgressStatusTest extends TestCase
 {
-    public function testValidTransitions(): void
+    #[DataProvider('validTransitionsProvider')]
+    public function testValidTransitions(ProgressStatus $fromStatus, ProgressStatus $toStatus): void
     {
-        $validTransitions = [
-            [ProgressStatus::PENDING, ProgressStatus::COMPLETE],
-            [ProgressStatus::PENDING, ProgressStatus::FAILED],
-            [ProgressStatus::FAILED, ProgressStatus::COMPLETE],
-            [ProgressStatus::FAILED, ProgressStatus::PENDING], // Can reset to pending
-            [ProgressStatus::COMPLETE, ProgressStatus::PENDING], // Can reset to pending
+        $this->assertTrue(ProgressStatus::canTransition($fromStatus, $toStatus));
+    }
+
+    public static function validTransitionsProvider(): array
+    {
+        return [
+            'PENDING to COMPLETE' => [ProgressStatus::PENDING, ProgressStatus::COMPLETE],
+            'PENDING to FAILED' => [ProgressStatus::PENDING, ProgressStatus::FAILED],
+            'FAILED to COMPLETE' => [ProgressStatus::FAILED, ProgressStatus::COMPLETE],
+            'FAILED to PENDING' => [ProgressStatus::FAILED, ProgressStatus::PENDING],
+            'COMPLETE to PENDING' => [ProgressStatus::COMPLETE, ProgressStatus::PENDING],
         ];
-
-        foreach ($validTransitions as [$fromStatus, $toStatus]) {
-            $this->assertTrue(ProgressStatus::canTransition($fromStatus, $toStatus));
-        }
     }
 
-    public function testInvalidTransitions(): void
+    #[DataProvider('invalidTransitionsProvider')]
+    public function testInvalidTransitions(ProgressStatus $fromStatus, ProgressStatus $toStatus): void
     {
-        $invalidTransitions = [
-            [ProgressStatus::COMPLETE, ProgressStatus::FAILED], // Cannot go from complete to failed
-            [ProgressStatus::PENDING, ProgressStatus::PENDING], // Cannot stay in same status
+        $this->assertFalse(ProgressStatus::canTransition($fromStatus, $toStatus));
+    }
+
+    public static function invalidTransitionsProvider(): array
+    {
+        return [
+            'COMPLETE to FAILED' => [ProgressStatus::COMPLETE, ProgressStatus::FAILED],
+            'PENDING to PENDING' => [ProgressStatus::PENDING, ProgressStatus::PENDING],
         ];
-
-        foreach ($invalidTransitions as [$fromStatus, $toStatus]) {
-            $this->assertFalse(ProgressStatus::canTransition($fromStatus, $toStatus));
-        }
     }
 
-    public function testGetAllowedTransitions(): void
+    #[DataProvider('getAllowedTransitionsProvider')]
+    public function testGetAllowedTransitions(ProgressStatus $status, array $expectedTransitions): void
     {
-        $this->assertEquals(
-            [ProgressStatus::COMPLETE, ProgressStatus::FAILED],
-            ProgressStatus::getAllowedTransitions(ProgressStatus::PENDING)
-        );
-
-        $this->assertEquals(
-            [ProgressStatus::COMPLETE, ProgressStatus::PENDING], // Can retry or reset
-            ProgressStatus::getAllowedTransitions(ProgressStatus::FAILED)
-        );
-
-        $this->assertEquals(
-            [ProgressStatus::PENDING], // Can reset to pending
-            ProgressStatus::getAllowedTransitions(ProgressStatus::COMPLETE)
-        );
+        $this->assertEquals($expectedTransitions, ProgressStatus::getAllowedTransitions($status));
     }
 
-    public function testIsFinal(): void
+    public static function getAllowedTransitionsProvider(): array
     {
-        $this->assertTrue(ProgressStatus::isFinal(ProgressStatus::COMPLETE));
-        $this->assertFalse(ProgressStatus::isFinal(ProgressStatus::PENDING));
-        $this->assertFalse(ProgressStatus::isFinal(ProgressStatus::FAILED));
+        return [
+            'PENDING allowed transitions' => [
+                ProgressStatus::PENDING,
+                [ProgressStatus::COMPLETE, ProgressStatus::FAILED]
+            ],
+            'FAILED allowed transitions' => [
+                ProgressStatus::FAILED,
+                [ProgressStatus::COMPLETE, ProgressStatus::PENDING]
+            ],
+            'COMPLETE allowed transitions' => [
+                ProgressStatus::COMPLETE,
+                [ProgressStatus::PENDING]
+            ],
+        ];
     }
 
-    public function testFromString(): void
+    #[DataProvider('isFinalProvider')]
+    public function testIsFinal(ProgressStatus $status, bool $expected): void
     {
-        $this->assertEquals(ProgressStatus::PENDING, ProgressStatus::fromString('pending'));
-        $this->assertEquals(ProgressStatus::COMPLETE, ProgressStatus::fromString('complete'));
-        $this->assertEquals(ProgressStatus::FAILED, ProgressStatus::fromString('failed'));
+        $this->assertEquals($expected, ProgressStatus::isFinal($status));
+    }
+
+    public static function isFinalProvider(): array
+    {
+        return [
+            'COMPLETE is final' => [ProgressStatus::COMPLETE, true],
+            'PENDING is not final' => [ProgressStatus::PENDING, false],
+            'FAILED is not final' => [ProgressStatus::FAILED, false],
+        ];
+    }
+
+    #[DataProvider('fromStringProvider')]
+    public function testFromString(string $input, ProgressStatus $expected): void
+    {
+        $this->assertEquals($expected, ProgressStatus::fromString($input));
+    }
+
+    public static function fromStringProvider(): array
+    {
+        return [
+            'pending string' => ['pending', ProgressStatus::PENDING],
+            'complete string' => ['complete', ProgressStatus::COMPLETE],
+            'failed string' => ['failed', ProgressStatus::FAILED],
+        ];
     }
 
     public function testFromStringInvalid(): void
@@ -72,5 +99,17 @@ class ProgressStatusTest extends TestCase
         ProgressStatus::fromString('invalid_status');
     }
 
+    // Test data provider functionality
+    public function testDataProviderExample(): void
+    {
+        $testCases = [
+            ['pending', ProgressStatus::PENDING],
+            ['complete', ProgressStatus::COMPLETE],
+            ['failed', ProgressStatus::FAILED],
+        ];
 
+        foreach ($testCases as [$input, $expected]) {
+            $this->assertEquals($expected, ProgressStatus::fromString($input));
+        }
+    }
 }

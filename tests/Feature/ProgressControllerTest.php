@@ -5,6 +5,7 @@ namespace App\Tests\Feature;
 use App\Entity\Course;
 use App\Entity\Lesson;
 use App\Entity\User;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class ProgressControllerTest extends BaseFeatureTest
 {
@@ -97,15 +98,12 @@ class ProgressControllerTest extends BaseFeatureTest
         $this->assertEquals('Invalid JSON', $responseData['error']);
     }
 
-    public function testCreateProgressValidationErrors(): void
+    #[DataProvider('validationErrorsProvider')]
+    public function testCreateProgressValidationErrors(array $invalidData): void
     {
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
-        ], json_encode([
-            'user_id' => 0,
-            'lesson_id' => -1,
-            'request_id' => '',
-        ]));
+        ], json_encode($invalidData));
 
         $this->assertResponseStatusCodeSame(400);
         
@@ -114,42 +112,69 @@ class ProgressControllerTest extends BaseFeatureTest
         $this->assertNotEmpty($responseData['errors']);
     }
 
-    public function testCreateProgressUserNotFound(): void
+    public static function validationErrorsProvider(): array
     {
-        $lesson = $this->getTestLesson();
-
-        $this->client->request('POST', '/progress', [], [], [
-            'CONTENT_TYPE' => 'application/json',
-        ], json_encode([
-            'user_id' => 99999,
-            'lesson_id' => $lesson->getId(),
-            'request_id' => 'test-request-123',
-        ]));
-
-        $this->assertResponseStatusCodeSame(404);
-        
-        $responseData = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('error', $responseData);
-        $this->assertStringContainsString('User 99999 not found', $responseData['error']);
+        return [
+            'invalid user_id and lesson_id' => [
+                [
+                    'user_id' => 0,
+                    'lesson_id' => -1,
+                    'request_id' => '',
+                ]
+            ],
+            'missing required fields' => [
+                [
+                    'user_id' => null,
+                    'lesson_id' => null,
+                    'request_id' => null,
+                ]
+            ],
+            'negative values' => [
+                [
+                    'user_id' => -5,
+                    'lesson_id' => -10,
+                    'request_id' => 'test',
+                ]
+            ],
+        ];
     }
 
-    public function testCreateProgressLessonNotFound(): void
+    #[DataProvider('notFoundProvider')]
+    public function testCreateProgressNotFound(string $entityType, int $invalidId, string $expectedError): void
     {
-        $user = $this->getTestUser();
+        if ($entityType === 'user') {
+            $lesson = $this->getTestLesson();
+            $requestData = [
+                'user_id' => $invalidId,
+                'lesson_id' => $lesson->getId(),
+                'request_id' => 'test-request-123',
+            ];
+        } else {
+            $user = $this->getTestUser();
+            $requestData = [
+                'user_id' => $user->getId(),
+                'lesson_id' => $invalidId,
+                'request_id' => 'test-request-123',
+            ];
+        }
 
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
-        ], json_encode([
-            'user_id' => $user->getId(),
-            'lesson_id' => 99999,
-            'request_id' => 'test-request-123',
-        ]));
+        ], json_encode($requestData));
 
         $this->assertResponseStatusCodeSame(404);
         
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('error', $responseData);
-        $this->assertStringContainsString('Lesson 99999 not found', $responseData['error']);
+        $this->assertStringContainsString($expectedError, $responseData['error']);
+    }
+
+    public static function notFoundProvider(): array
+    {
+        return [
+            'user not found' => ['user', 99999, 'User 99999 not found'],
+            'lesson not found' => ['lesson', 99999, 'Lesson 99999 not found'],
+        ];
     }
 
     public function testGetUserProgressSuccess(): void
