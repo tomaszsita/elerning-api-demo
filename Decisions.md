@@ -172,6 +172,27 @@
 - Natural course progression logic
 - Easier to understand and debug
 
+### 18. Database Migration Simplification
+**Decision:** Simplify Doctrine-generated migrations for better readability
+**Rationale:**
+- Doctrine-generated migrations are overly verbose and hard to read
+- Manual SQL is more readable and maintainable
+- Easier to understand database schema at a glance
+- Better developer experience
+
+**Implementation:**
+- Combined multiple migrations into one clean migration
+- Used readable SQL with proper formatting and comments
+- Organized tables creation in logical order (users → courses → lessons → enrollments → progress)
+- Added descriptive comments for each table
+- Used meaningful index names instead of auto-generated ones
+
+**Benefits:**
+- Much more readable and maintainable migrations
+- Easier to understand database schema
+- Better developer experience
+- Cleaner git history
+
 ## API Design
 
 ### 9. RESTful Endpoints
