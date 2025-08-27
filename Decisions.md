@@ -128,8 +128,9 @@
 
 **Implementation:** 
 - DELETE endpoint resets status to PENDING instead of removing record
-- ProgressStatus enum allows COMPLETE → PENDING transition
+- ProgressStatus enum allows COMPLETE → PENDING and FAILED → PENDING transitions
 - CompletedAt timestamp is cleared on reset
+- Both completed and failed progress can be reset to allow retry
 
 ## API Design
 

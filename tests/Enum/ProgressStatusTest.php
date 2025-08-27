@@ -13,6 +13,7 @@ class ProgressStatusTest extends TestCase
             [ProgressStatus::PENDING, ProgressStatus::COMPLETE],
             [ProgressStatus::PENDING, ProgressStatus::FAILED],
             [ProgressStatus::FAILED, ProgressStatus::COMPLETE],
+            [ProgressStatus::FAILED, ProgressStatus::PENDING], // Can reset to pending
             [ProgressStatus::COMPLETE, ProgressStatus::PENDING], // Can reset to pending
         ];
 
@@ -25,7 +26,6 @@ class ProgressStatusTest extends TestCase
     {
         $invalidTransitions = [
             [ProgressStatus::COMPLETE, ProgressStatus::FAILED], // Cannot go from complete to failed
-            [ProgressStatus::FAILED, ProgressStatus::PENDING], // Cannot go from failed to pending
             [ProgressStatus::PENDING, ProgressStatus::PENDING], // Cannot stay in same status
         ];
 
@@ -42,7 +42,7 @@ class ProgressStatusTest extends TestCase
         );
 
         $this->assertEquals(
-            [ProgressStatus::COMPLETE],
+            [ProgressStatus::COMPLETE, ProgressStatus::PENDING], // Can retry or reset
             ProgressStatus::getAllowedTransitions(ProgressStatus::FAILED)
         );
 

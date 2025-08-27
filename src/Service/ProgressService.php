@@ -74,7 +74,7 @@ class ProgressService
     public function deleteProgress(int $userId, int $lessonId): void
     {
         $progress = $this->progressRepository->findByUserAndLesson($userId, $lessonId);
-        if ($progress && $progress->getStatus() === \App\Enum\ProgressStatus::COMPLETE) {
+        if ($progress && in_array($progress->getStatus(), [\App\Enum\ProgressStatus::COMPLETE, \App\Enum\ProgressStatus::FAILED])) {
             // Reset to pending instead of deleting - preserves audit trail
             $progress->setStatus(\App\Enum\ProgressStatus::PENDING);
             $progress->setCompletedAt(null);
