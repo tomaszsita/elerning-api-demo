@@ -183,6 +183,8 @@ class EnrollmentServiceTest extends TestCase
             ->willReturn(20);
             
 
+            
+
 
         // Act & Assert
         $this->expectException(CourseFullException::class);

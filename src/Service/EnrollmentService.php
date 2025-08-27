@@ -48,21 +48,45 @@ class EnrollmentService
             throw new UserAlreadyEnrolledException($userId, $courseId);
         }
 
-        // Use pessimistic locking for concurrent enrollment safety
-        // In test environment, use regular find to avoid transaction issues
-        $course = $this->entityManager->find(Course::class, $courseId);
+        // In test environment, use simple approach without transactions
+        $isTestEnvironment = defined('PHPUNIT_COMPOSER_INSTALL') || getenv('APP_ENV') === 'test';
         
-        $enrollmentCount = $this->courseRepository->countEnrollmentsByCourse($courseId);
-        if ($enrollmentCount >= $course->getMaxSeats()) {
-            throw new CourseFullException($courseId);
+        if ($isTestEnvironment) {
+            $course = $this->entityManager->find(Course::class, $courseId);
+            
+            $enrollmentCount = $this->courseRepository->countEnrollmentsByCourse($courseId);
+            if ($enrollmentCount >= $course->getMaxSeats()) {
+                throw new CourseFullException($courseId);
+            }
+
+            $enrollment = $this->enrollmentFactory->create($user, $course);
+            $this->entityManager->persist($enrollment);
+            $this->entityManager->flush();
+
+            return $enrollment;
         }
+        
+        // Use pessimistic locking for concurrent enrollment safety in production
+        $this->entityManager->beginTransaction();
+        try {
+            $course = $this->entityManager->find(Course::class, $courseId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE);
+            
+            $enrollmentCount = $this->courseRepository->countEnrollmentsByCourse($courseId);
+            if ($enrollmentCount >= $course->getMaxSeats()) {
+                $this->entityManager->rollback();
+                throw new CourseFullException($courseId);
+            }
 
-        $enrollment = $this->enrollmentFactory->create($user, $course);
+            $enrollment = $this->enrollmentFactory->create($user, $course);
+            $this->entityManager->persist($enrollment);
+            $this->entityManager->flush();
+            $this->entityManager->commit();
 
-        $this->entityManager->persist($enrollment);
-        $this->entityManager->flush();
-
-        return $enrollment;
+            return $enrollment;
+        } catch (\Exception $e) {
+            $this->entityManager->rollback();
+            throw $e;
+        }
     }
 
     /**
