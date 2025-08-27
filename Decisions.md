@@ -1,136 +1,84 @@
-# E-Learning API - Implementation Decisions
+# Implementation Decisions
 
-## Overview
-This document outlines key architectural and implementation decisions for the e-learning platform API, designed to meet the requirements of a coding challenge while demonstrating best practices and technical expertise.
+## Tech Stack
+Went with Symfony 7 + PHP 8.4. Latest versions show I keep up with current practices, plus Symfony's ecosystem is solid for this kind of project.
 
-## Key Implementation Choices
+## Key Decisions
 
-### 1. Symfony 7 + PHP 8.4 Stack
-**Choice**: Modern Symfony framework with latest PHP version
-**Rationale**: 
-- Demonstrates familiarity with current best practices
-- Leverages Symfony's robust ecosystem (Doctrine, Validator, EventDispatcher)
-- PHP 8.4 features improve type safety and performance
-**Trade-offs**: Requires recent PHP version, but shows forward-thinking approach
+### Event-Driven Progress History
+Instead of directly saving progress history in the service, I used Symfony's EventDispatcher. This keeps the progress service focused on its core logic and makes it easy to add things like notifications later.
 
-### 2. Event-Driven Architecture for Progress Tracking
-**Choice**: Symfony EventDispatcher for progress history
-**Rationale**:
-- Decouples progress tracking from business logic
-- Enables easy extension (notifications, analytics)
-- Follows SOLID principles
-**Trade-offs**: Slight complexity increase, but better maintainability
+**Trade-off**: Bit more complex setup, but much cleaner separation of concerns.
 
-### 3. Factory Pattern for Entity Creation
-**Choice**: Dedicated factories for Progress, Enrollment, and test data
-**Rationale**:
-- Improves testability through dependency injection
-- Centralizes entity creation logic
-- Follows Single Responsibility Principle
-**Trade-offs**: More files, but cleaner service classes
+### Factory Pattern
+Created factories for Progress, Enrollment, and test data. Makes testing easier with proper DI and keeps entity creation logic in one place.
 
-### 4. Repository Pattern with Interfaces
-**Choice**: Repository interfaces with concrete implementations
-**Rationale**:
-- Enables dependency injection and testing
-- Provides clear contracts for data access
-- Follows Dependency Inversion Principle
-**Trade-offs**: Additional abstraction layer, but better testability
+**Trade-off**: More files, but services are cleaner and more testable.
 
-### 5. RESTful API Design
-**Choice**: Standard REST conventions with proper HTTP status codes
-**Rationale**:
-- Predictable and intuitive API
-- Proper error handling (400, 404, 409)
-- Stateless operations
-**Trade-offs**: Some endpoints could be more specific, but follows REST standards
+### Repository Interfaces
+All repositories implement interfaces. This makes testing easier (can mock them) and follows DI principles.
 
-## Trade-offs Considered
+### RESTful API
+Standard REST conventions with proper HTTP codes (400, 404, 409). Nothing fancy, just predictable endpoints.
 
-### Database Design
-**Considered**: Explicit Prerequisite entity vs. Order-based prerequisites
-**Chosen**: Order-based (lesson index determines prerequisites)
-**Trade-off**: Simpler schema vs. less flexible prerequisite logic
-**Justification**: YAGNI principle - current requirements don't need complex prerequisites
+## Database Design Choices
 
-### Progress Reset Strategy
-**Considered**: Delete vs. Reset to pending
-**Chosen**: Reset to pending (preserves audit trail)
-**Trade-off**: Slightly more complex vs. better analytics capabilities
-**Justification**: Business value of progress history outweighs complexity
+### Prerequisites: Order-based vs Explicit Entity
+Went with order-based (lesson index determines prerequisites). The requirements didn't specify complex prerequisite logic, so I kept it simple. YAGNI principle.
 
-### Transaction Management
-**Considered**: Complex transactions vs. Simple operations
-**Chosen**: Simple operations for testability
-**Trade-off**: Potential race conditions vs. easier testing
-**Justification**: For coding challenge, testability is more important than edge cases
+**Trade-off**: Less flexible, but much simpler schema and logic.
 
-### Error Handling
-**Considered**: Generic vs. Specific error messages
-**Chosen**: Specific error messages with proper HTTP codes
-**Trade-off**: More maintenance vs. better developer experience
-**Justification**: API usability is crucial for integration
+### Progress Reset: Delete vs Reset
+Chose to reset progress to 'pending' instead of deleting records. This preserves audit trail and allows for analytics.
 
-## Design Alignment with Requirements
+**Trade-off**: Slightly more complex, but business value of keeping history outweighs the complexity.
 
-### ✅ Core Requirements Met
-- **User enrollment**: RESTful endpoints with proper validation
-- **Progress tracking**: Complete with status transitions and history
-- **Prerequisites**: Order-based implementation
-- **Course capacity**: Enforced with proper error handling
-- **Idempotency**: Handled in progress creation
+### Transactions
+Kept it simple for the coding challenge. Could add proper locking for production, but testability was more important here.
 
-### ✅ Nice-to-Have Features
-- **Progress reset**: DELETE endpoint resets to pending
-- **Progress history**: Event-driven audit trail
-- **CLI commands**: Data loading and progress summary
-- **Comprehensive testing**: 61 tests covering all scenarios
+## Requirements Coverage
 
-### ✅ Technical Excellence
-- **Static analysis**: PHPStan level 6 with 0 errors
-- **Code quality**: SOLID principles, clean architecture
-- **Documentation**: Comprehensive README and API docs
-- **Testing tools**: Postman collection and curl scripts
+### Core Features ✅
+- User enrollment with validation
+- Progress tracking with status transitions  
+- Prerequisites (order-based)
+- Course capacity limits
+- Idempotent progress creation
 
-## Architecture Highlights
+### Nice-to-Have ✅
+- Progress reset (DELETE endpoint)
+- Progress history (event-driven)
+- CLI commands for data loading
+- 61 tests covering edge cases
 
-### Layered Architecture
+### Code Quality ✅
+- PHPStan level 6, 0 errors
+- SOLID principles
+- Clean architecture
+- Comprehensive docs
+
+## Architecture
+
 ```
 Controllers → Services → Repositories → Entities
-     ↓           ↓           ↓           ↓
-  HTTP API   Business    Data Access   Domain
-            Logic       Layer         Model
 ```
 
-### Key Patterns Used
-- **Repository Pattern**: Data access abstraction
-- **Factory Pattern**: Entity creation
-- **Event-Driven**: Progress tracking
-- **Dependency Injection**: Service composition
-- **Value Objects**: Email, CourseTitle validation
+Used standard patterns:
+- Repository pattern for data access
+- Factory pattern for entity creation  
+- Event-driven for progress tracking
+- DI throughout
 
-### Testing Strategy
-- **Unit Tests**: Services, entities, enums
-- **Feature Tests**: API endpoints with database
-- **Integration Tests**: Full request/response cycle
-- **Static Analysis**: PHPStan for type safety
+## Testing
+- Unit tests for services/entities
+- Feature tests for API endpoints
+- PHPStan for static analysis
+- Postman collection for manual testing
 
-## Performance Considerations
-- **Database indexes**: Proper foreign key and unique constraints
-- **Lazy loading**: Doctrine relationships
-- **Query optimization**: Efficient repository methods
-- **Caching ready**: Symfony cache component available
+## Production Considerations
+- Database indexes on foreign keys
+- Input validation with Symfony Validator
+- Error handling without exposing internals
+- Stateless API (easy to scale)
 
-## Security Considerations
-- **Input validation**: Symfony Validator component
-- **SQL injection**: Doctrine ORM protection
-- **Error handling**: No sensitive data in error messages
-- **Rate limiting ready**: Can be added via Symfony bundles
-
-## Scalability Considerations
-- **Stateless API**: No session dependencies
-- **Database design**: Normalized schema with proper relationships
-- **Event system**: Easy to add async processing
-- **Microservice ready**: Clear service boundaries
-
-This implementation demonstrates modern PHP development practices while meeting all functional requirements and providing a solid foundation for future enhancements.
+The implementation focuses on clean, testable code while meeting all requirements. Could add more features like caching, rate limiting, or async processing, but kept it focused for the challenge.
