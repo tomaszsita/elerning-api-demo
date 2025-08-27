@@ -5,9 +5,8 @@ namespace App\Tests\Service;
 use App\Entity\Course;
 use App\Entity\Enrollment;
 use App\Entity\User;
-use App\Exception\CourseFullException;
+use App\Exception\EnrollmentException;
 use App\Exception\EntityNotFoundException;
-use App\Exception\UserAlreadyEnrolledException;
 use App\Repository\CourseRepository;
 use App\Repository\EnrollmentRepository;
 use App\Repository\UserRepository;
@@ -152,7 +151,7 @@ class EnrollmentServiceTest extends TestCase
             ->willReturn(true);
 
         // Act & Assert
-        $this->expectException(UserAlreadyEnrolledException::class);
+        $this->expectException(EnrollmentException::class);
         $this->enrollmentService->enrollUser($userId, $courseId);
     }
 
@@ -198,7 +197,7 @@ class EnrollmentServiceTest extends TestCase
 
 
         // Act & Assert
-        $this->expectException(CourseFullException::class);
+        $this->expectException(EnrollmentException::class);
         $this->enrollmentService->enrollUser($userId, $courseId);
     }
 }

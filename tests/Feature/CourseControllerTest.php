@@ -138,7 +138,7 @@ class CourseControllerTest extends AbstractFeature
             'user_id' => $user->getId(),
         ]));
 
-        $this->assertResponseStatusCodeSame(400);
+        $this->assertResponseStatusCodeSame(409);
         
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('error', $responseData);

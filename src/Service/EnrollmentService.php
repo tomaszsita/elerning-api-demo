@@ -5,8 +5,7 @@ namespace App\Service;
 use App\Entity\Enrollment;
 use App\Entity\User;
 use App\Entity\Course;
-use App\Exception\CourseFullException;
-use App\Exception\UserAlreadyEnrolledException;
+use App\Exception\EnrollmentException;
 use App\Exception\EntityNotFoundException;
 use App\Repository\Interfaces\CourseRepositoryInterface;
 use App\Repository\Interfaces\EnrollmentRepositoryInterface;
@@ -44,7 +43,7 @@ class EnrollmentService
         }
 
         if ($this->enrollmentRepository->existsByUserAndCourse($userId, $courseId)) {
-            throw new UserAlreadyEnrolledException($userId, $courseId);
+            throw new EnrollmentException(EnrollmentException::ALREADY_ENROLLED, $userId, $courseId);
         }
 
         // Use pessimistic locking for concurrent enrollment safety
@@ -54,7 +53,7 @@ class EnrollmentService
             
             $enrollmentCount = $this->courseRepository->countEnrollmentsByCourse($courseId);
             if ($enrollmentCount >= $course->getMaxSeats()) {
-                throw new CourseFullException($courseId);
+                throw new EnrollmentException(EnrollmentException::COURSE_FULL, $userId, $courseId);
             }
 
             $enrollment = $this->enrollmentFactory->create($user, $course);

@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Entity\Lesson;
 use App\Enum\ProgressStatus;
 use App\Exception\EntityNotFoundException;
+use App\Exception\EnrollmentException;
 use App\Exception\InvalidStatusTransitionException;
 use App\Repository\Interfaces\EnrollmentRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -54,7 +55,7 @@ class ValidationService
     public function validateEnrollment(int $userId, Lesson $lesson): void
     {
         if (!$this->enrollmentRepository->existsByUserAndCourse($userId, $lesson->getCourse()->getId())) {
-            throw new \App\Exception\UserNotEnrolledException($userId, $lesson->getCourse()->getId());
+            throw new EnrollmentException(EnrollmentException::NOT_ENROLLED, $userId, $lesson->getCourse()->getId());
         }
     }
 

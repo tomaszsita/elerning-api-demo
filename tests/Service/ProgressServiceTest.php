@@ -9,8 +9,8 @@ use App\Entity\Progress;
 use App\Entity\User;
 use App\Enum\ProgressStatus;
 use App\Exception\EntityNotFoundException;
+use App\Exception\EnrollmentException;
 use App\Exception\PrerequisitesNotMetException;
-use App\Exception\UserNotEnrolledException;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
 use App\Service\ProgressService;
 use App\Service\ValidationService;
@@ -177,9 +177,9 @@ class ProgressServiceTest extends TestCase
         $this->validationService->expects($this->once())
             ->method('validateEnrollment')
             ->with(1, $lesson)
-            ->willThrowException(new UserNotEnrolledException(1, 1));
+            ->willThrowException(new EnrollmentException(EnrollmentException::NOT_ENROLLED, 1, 1));
 
-        $this->expectException(UserNotEnrolledException::class);
+        $this->expectException(EnrollmentException::class);
 
         $this->progressService->createProgress(1, 1, 'test-request-123');
     }

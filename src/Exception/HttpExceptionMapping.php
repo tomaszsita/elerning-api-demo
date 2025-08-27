@@ -7,15 +7,13 @@ class HttpExceptionMapping
     public const MAPPING = [
         // 400 Bad Request - Client errors
         InvalidStatusTransitionException::class => 400,
-        UserAlreadyEnrolledException::class => 400,
-        UserNotEnrolledException::class => 400,
         PrerequisitesNotMetException::class => 409,
         
         // 404 Not Found - Resource not found
         EntityNotFoundException::class => 404,
         
         // 409 Conflict - Business rule violations
-        CourseFullException::class => 409,
+        EnrollmentException::class => 409,
     ];
 
     public static function getStatusCode(\Throwable $exception): int

@@ -5,7 +5,7 @@ namespace App\Tests\Exception;
 use App\Exception\HttpExceptionMapping;
 use App\Exception\InvalidStatusTransitionException;
 use App\Exception\EntityNotFoundException;
-use App\Exception\CourseFullException;
+use App\Exception\EnrollmentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -28,8 +28,8 @@ class HttpExceptionMappingTest extends TestCase
                 new EntityNotFoundException('User', 123),
                 404
             ],
-            'CourseFullException returns 409' => [
-                new CourseFullException(456),
+            'EnrollmentException returns 409' => [
+                new EnrollmentException(EnrollmentException::COURSE_FULL, 1, 456),
                 409
             ],
             'Unknown exception returns 500' => [
