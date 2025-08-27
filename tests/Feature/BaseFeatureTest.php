@@ -9,7 +9,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-abstract class AbstractFeatureTest extends WebTestCase
+/**
+ * @coversNothing
+ * @group base
+ */
+class BaseFeatureTest extends WebTestCase
 {
     protected EntityManagerInterface $entityManager;
     protected ContainerInterface $container;

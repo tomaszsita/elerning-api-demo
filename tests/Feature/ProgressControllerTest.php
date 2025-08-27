@@ -6,7 +6,7 @@ use App\Entity\Course;
 use App\Entity\Lesson;
 use App\Entity\User;
 
-class ProgressControllerTest extends AbstractFeatureTest
+class ProgressControllerTest extends BaseFeatureTest
 {
     public function testCreateProgressSuccess(): void
     {

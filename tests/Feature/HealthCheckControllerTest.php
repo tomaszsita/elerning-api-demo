@@ -2,7 +2,7 @@
 
 namespace App\Tests\Feature;
 
-class HealthCheckControllerTest extends AbstractFeatureTest
+class HealthCheckControllerTest extends BaseFeatureTest
 {
     public function testHealthEndpoint(): void
     {

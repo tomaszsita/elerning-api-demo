@@ -5,7 +5,7 @@ namespace App\Tests\Feature;
 use App\Entity\Course;
 use App\Entity\User;
 
-class EnrollmentControllerTest extends AbstractFeatureTest
+class EnrollmentControllerTest extends BaseFeatureTest
 {
     public function testCreateEnrollmentSuccess(): void
     {

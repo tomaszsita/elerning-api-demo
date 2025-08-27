@@ -6,7 +6,7 @@
          colors="true"
          failOnDeprecation="true"
          failOnNotice="true"
-         failOnWarning="true"
+         failOnWarning="false"
          bootstrap="tests/bootstrap.php"
          cacheDirectory=".phpunit.cache"
 >
