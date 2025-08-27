@@ -163,13 +163,14 @@ class CourseControllerTest extends AbstractFeature
         // Second user tries to enroll - should fail because course is full
         $user2 = $this->createTestUser('Jane Smith', 'jane.smith@example.com');
         
-        // Clear entity manager to ensure fresh state
-        $this->entityManager->clear();
+        // Debug: check if user2 exists in database
+        $this->entityManager->flush();
+        $user2Id = $user2->getId();
         
         $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => $user2->getId(),
+            'user_id' => $user2Id,
         ]));
 
         $this->assertResponseStatusCodeSame(409); // Conflict
