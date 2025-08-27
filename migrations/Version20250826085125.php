@@ -83,17 +83,38 @@ final class Version20250826085125 extends AbstractMigration
             )
         ');
 
+        // Create progress_history table for audit trail
+        $this->addSql('
+            CREATE TABLE progress_history (
+                id SERIAL PRIMARY KEY,
+                progress_id INT NOT NULL,
+                user_id INT NOT NULL,
+                lesson_id INT NOT NULL,
+                old_status VARCHAR(20),
+                new_status VARCHAR(20) NOT NULL,
+                changed_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+                request_id VARCHAR(255),
+                FOREIGN KEY (progress_id) REFERENCES progress(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (lesson_id) REFERENCES lessons(id)
+            )
+        ');
+
         // Create indexes for better performance
         $this->addSql('CREATE INDEX idx_enrollments_user ON enrollments(user_id)');
         $this->addSql('CREATE INDEX idx_enrollments_course ON enrollments(course_id)');
         $this->addSql('CREATE INDEX idx_lessons_course ON lessons(course_id)');
         $this->addSql('CREATE INDEX idx_progress_user ON progress(user_id)');
         $this->addSql('CREATE INDEX idx_progress_lesson ON progress(lesson_id)');
+        $this->addSql('CREATE INDEX idx_progress_history_progress ON progress_history(progress_id)');
+        $this->addSql('CREATE INDEX idx_progress_history_user ON progress_history(user_id)');
+        $this->addSql('CREATE INDEX idx_progress_history_lesson ON progress_history(lesson_id)');
     }
 
     public function down(Schema $schema): void
     {
         // Drop tables in reverse order (respecting foreign key constraints)
+        $this->addSql('DROP TABLE progress_history');
         $this->addSql('DROP TABLE progress');
         $this->addSql('DROP TABLE enrollments');
         $this->addSql('DROP TABLE lessons');

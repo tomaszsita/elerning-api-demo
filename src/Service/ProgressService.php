@@ -3,9 +3,11 @@
 namespace App\Service;
 
 use App\Entity\Progress;
+use App\Event\ProgressChangedEvent;
 use App\Factory\ProgressFactory;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class ProgressService
 {
     public function __construct(
@@ -13,13 +15,15 @@ class ProgressService
         PrerequisitesService $prerequisitesService,
         ProgressFactory $progressFactory,
         ProgressRepositoryInterface $progressRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        EventDispatcherInterface $eventDispatcher
     ) {
         $this->validationService = $validationService;
         $this->prerequisitesService = $prerequisitesService;
         $this->progressFactory = $progressFactory;
         $this->progressRepository = $progressRepository;
         $this->entityManager = $entityManager;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     private ValidationService $validationService;
@@ -27,6 +31,7 @@ class ProgressService
     private ProgressFactory $progressFactory;
     private ProgressRepositoryInterface $progressRepository;
     private EntityManagerInterface $entityManager;
+    private EventDispatcherInterface $eventDispatcher;
 
     public function createProgress(int $userId, int $lessonId, string $requestId, string $status = 'complete'): Progress
     {
@@ -62,6 +67,25 @@ class ProgressService
         $this->entityManager->flush();
     }
 
+    private function updateProgressStatus(Progress $progress, \App\Enum\ProgressStatus $newStatus, ?string $requestId = null): void
+    {
+        $oldStatus = $progress->getStatus() ? $progress->getStatus()->value : null;
+        
+        $progress->setStatus($newStatus);
+        
+        if ($newStatus === \App\Enum\ProgressStatus::COMPLETE) {
+            $progress->setCompletedAt(new \DateTimeImmutable());
+        } elseif ($newStatus === \App\Enum\ProgressStatus::PENDING) {
+            $progress->setCompletedAt(null);
+        }
+        
+        $this->entityManager->flush();
+
+        // Dispatch event for history tracking
+        $event = new ProgressChangedEvent($progress, $oldStatus, $newStatus->value, $requestId);
+        $this->eventDispatcher->dispatch($event, ProgressChangedEvent::NAME);
+    }
+
     public function getCourse(int $courseId): \App\Entity\Course
     {
         $course = $this->entityManager->find(\App\Entity\Course::class, $courseId);
@@ -71,14 +95,25 @@ class ProgressService
         return $course;
     }
 
+    /**
+     * @return \App\Entity\ProgressHistory[]
+     */
+    public function getProgressHistory(int $userId, int $lessonId): array
+    {
+        $this->validationService->validateAndGetUser($userId);
+        $this->validationService->validateAndGetLesson($lessonId);
+        
+        /** @var \App\Repository\ProgressHistoryRepository $repository */
+        $repository = $this->entityManager->getRepository(\App\Entity\ProgressHistory::class);
+        return $repository->findByUserAndLesson($userId, $lessonId);
+    }
+
     public function deleteProgress(int $userId, int $lessonId): void
     {
         $progress = $this->progressRepository->findByUserAndLesson($userId, $lessonId);
         if ($progress && in_array($progress->getStatus(), [\App\Enum\ProgressStatus::COMPLETE, \App\Enum\ProgressStatus::FAILED])) {
             // Reset to pending instead of deleting - preserves audit trail
-            $progress->setStatus(\App\Enum\ProgressStatus::PENDING);
-            $progress->setCompletedAt(null);
-            $this->entityManager->flush();
+            $this->updateProgressStatus($progress, \App\Enum\ProgressStatus::PENDING);
         }
     }
 }

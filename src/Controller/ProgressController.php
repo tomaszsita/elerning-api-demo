@@ -94,4 +94,14 @@ class ProgressController
         
         return new JsonResponse([], Response::HTTP_NO_CONTENT);
     }
+
+    #[Route('/{user_id}/lessons/{lesson_id}/history', methods: ['GET'])]
+    public function getProgressHistory(int $user_id, int $lesson_id): JsonResponse
+    {
+        $history = $this->progressService->getProgressHistory($user_id, $lesson_id);
+        
+        $historyData = array_map(fn($record) => $record->toArray(), $history);
+        
+        return new JsonResponse(['history' => $historyData], Response::HTTP_OK);
+    }
 }

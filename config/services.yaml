@@ -24,6 +24,10 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
+    App\EventListener\ProgressHistoryListener:
+        tags:
+            - { name: kernel.event_listener, event: progress.changed, method: onProgressChanged }
+
     # Repository interfaces mapping
     App\Repository\Interfaces\UserRepositoryInterface:
         alias: App\Repository\UserRepository

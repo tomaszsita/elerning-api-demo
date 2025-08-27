@@ -18,6 +18,7 @@ use App\Service\ValidationService;
 use App\Service\PrerequisitesService;
 use App\Factory\ProgressFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use PHPUnit\Framework\TestCase;
 
 class ProgressServiceTest extends TestCase
@@ -28,6 +29,7 @@ class ProgressServiceTest extends TestCase
     private ProgressFactory $progressFactory;
     private ProgressRepositoryInterface $progressRepository;
     private EntityManagerInterface $entityManager;
+    private EventDispatcherInterface $eventDispatcher;
 
     protected function setUp(): void
     {
@@ -36,13 +38,15 @@ class ProgressServiceTest extends TestCase
         $this->progressFactory = $this->createMock(ProgressFactory::class);
         $this->progressRepository = $this->createMock(ProgressRepositoryInterface::class);
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
+        $this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
 
         $this->progressService = new ProgressService(
             $this->validationService,
             $this->prerequisitesService,
             $this->progressFactory,
             $this->progressRepository,
-            $this->entityManager
+            $this->entityManager,
+            $this->eventDispatcher
         );
     }
 

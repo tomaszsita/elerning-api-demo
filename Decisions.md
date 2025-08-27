@@ -295,6 +295,118 @@ $progress = $this->progressFactory->create($user, $lesson, $requestId, $status);
 - **Generic collections** - Add proper generic types to Doctrine collections
 - **Array return types** - Specify value types in array return types
 
+## 15. Progress Reset Strategy
+
+**Decision**: Reset progress to 'pending' instead of deleting records to preserve audit trail.
+
+**Rationale**:
+- Maintains complete history of progress changes
+- Allows for analytics and reporting
+- Preserves data integrity
+- Enables progress recovery if needed
+
+**Implementation**:
+- `deleteProgress()` method resets status to `PENDING` instead of removing record
+- Updates `ProgressStatus` enum to allow `COMPLETE` → `PENDING` and `FAILED` → `PENDING` transitions
+- Clears `completedAt` timestamp when resetting to pending
+- Maintains all existing progress history
+
+**Benefits**:
+- Complete audit trail preserved
+- Analytics and reporting capabilities
+- Data recovery options
+- Consistent with business requirements
+
+## 16. Data Providers in Tests
+
+**Decision**: Use PHPUnit 12 data providers with attributes for better test organization.
+
+**Rationale**:
+- Reduces test code duplication
+- Improves test readability
+- Makes test maintenance easier
+- Follows PHPUnit 12 best practices
+
+**Implementation**:
+- Use `#[DataProvider]` attributes on test methods
+- Create `static` provider methods for data sets
+- Group related test cases in single test methods
+- Maintain descriptive test names with data set labels
+
+**Benefits**:
+- Cleaner test code
+- Better test coverage
+- Easier maintenance
+- Modern PHPUnit practices
+
+## 17. Prerequisites Implementation Strategy
+
+**Decision**: Use order-based prerequisites instead of explicit Prerequisite entity.
+
+**Rationale**:
+- Simpler data model
+- Easier to understand and maintain
+- Reduces database complexity
+- Follows YAGNI principle
+
+**Implementation**:
+- Remove `Prerequisite` entity and related code
+- Use lesson `order_index` for prerequisite checking
+- Lessons with lower order must be completed before higher order
+- Update `PrerequisitesService` to use order-based logic
+
+**Benefits**:
+- Simpler database schema
+- Easier to understand business logic
+- Reduced complexity
+- Better performance
+
+## 18. Database Migration Simplification
+
+**Decision**: Simplify Doctrine-generated migrations for better readability and maintainability.
+
+**Rationale**: 
+- Doctrine auto-generated migrations are verbose and hard to read
+- Manual SQL provides better control over table structure
+- Cleaner migration history with consolidated changes
+
+**Implementation**:
+- Rewrite migrations using raw SQL instead of Doctrine's Schema API
+- Combine multiple migrations into single comprehensive migration
+- Use proper SQL formatting with comments and logical table order
+- Replace auto-generated index names with meaningful ones (idx_*)
+- Organize tables in dependency order: users → courses → lessons → enrollments → progress
+
+**Benefits**:
+- Much more readable and maintainable database schema
+- Easier to understand table relationships and constraints
+- Better developer experience when reviewing migrations
+- Cleaner migration history
+
+## 19. Event-Driven Progress History
+
+**Decision**: Implement event-driven architecture for tracking progress changes using Symfony's EventDispatcher.
+
+**Rationale**:
+- Decouples progress tracking from business logic
+- Allows for easy extension of history tracking features
+- Follows Symfony's event-driven patterns
+- Provides audit trail for compliance and analytics
+
+**Implementation**:
+- `ProgressChangedEvent`: Event dispatched when progress status changes
+- `ProgressHistoryListener`: Listener that records history entries
+- `ProgressHistory` entity: Stores audit trail with old/new status, timestamps, request IDs
+- Event registration in `services.yaml` with proper tags
+- Foreign key with CASCADE DELETE to maintain referential integrity
+
+**Benefits**:
+- Complete audit trail of all progress changes
+- Easy to extend with additional listeners (notifications, analytics, etc.)
+- Maintains data integrity with proper foreign key constraints
+- Follows SOLID principles and Symfony best practices
+- Request ID tracking for debugging and correlation
+
 ## Performance & Scalability
 
 ### 13. Database Indexing
