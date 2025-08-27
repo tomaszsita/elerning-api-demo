@@ -34,7 +34,7 @@ class PrerequisitesService
         foreach ($prerequisiteLessons as $prerequisiteLesson) {
             $progress = $this->progressRepository->findByUserAndLesson($userId, $prerequisiteLesson->getId());
             
-            if (!$progress || $progress->getStatus() !== ProgressStatus::COMPLETE) {
+            if (!$progress || !in_array($progress->getStatus(), [ProgressStatus::COMPLETE, ProgressStatus::FAILED])) {
                 throw new PrerequisitesNotMetException(
                     $userId,
                     $lesson->getId(),

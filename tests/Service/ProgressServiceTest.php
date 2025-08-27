@@ -118,6 +118,106 @@ class ProgressServiceTest extends TestCase
         $this->assertSame($existingProgress, $result);
     }
 
+    public function testCreateProgressWithFailedAction(): void
+    {
+        $user = $this->createMock(User::class);
+        $lesson = $this->createMock(Lesson::class);
+        $progress = $this->createMock(Progress::class);
+
+        $this->progressRepository->expects($this->once())
+            ->method('findByRequestId')
+            ->with('test-request-456')
+            ->willReturn(null);
+
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetUser')
+            ->with(1)
+            ->willReturn($user);
+
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetLesson')
+            ->with(1)
+            ->willReturn($lesson);
+
+        $this->validationService->expects($this->once())
+            ->method('validateEnrollment')
+            ->with(1, $lesson);
+
+        $this->prerequisitesService->expects($this->once())
+            ->method('checkPrerequisites')
+            ->with(1, $lesson);
+
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetStatus')
+            ->with('failed')
+            ->willReturn(\App\Enum\ProgressStatus::FAILED);
+
+        $this->progressFactory->expects($this->once())
+            ->method('create')
+            ->with($user, $lesson, 'test-request-456', \App\Enum\ProgressStatus::FAILED)
+            ->willReturn($progress);
+
+        $this->entityManager->expects($this->once())
+            ->method('persist')
+            ->with($progress);
+
+        $this->entityManager->expects($this->once())
+            ->method('flush');
+
+        $result = $this->progressService->createProgress(1, 1, 'test-request-456', 'failed');
+        $this->assertInstanceOf(Progress::class, $result);
+    }
+
+    public function testCreateProgressWithPendingAction(): void
+    {
+        $user = $this->createMock(User::class);
+        $lesson = $this->createMock(Lesson::class);
+        $progress = $this->createMock(Progress::class);
+
+        $this->progressRepository->expects($this->once())
+            ->method('findByRequestId')
+            ->with('test-request-789')
+            ->willReturn(null);
+
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetUser')
+            ->with(1)
+            ->willReturn($user);
+
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetLesson')
+            ->with(1)
+            ->willReturn($lesson);
+
+        $this->validationService->expects($this->once())
+            ->method('validateEnrollment')
+            ->with(1, $lesson);
+
+        $this->prerequisitesService->expects($this->once())
+            ->method('checkPrerequisites')
+            ->with(1, $lesson);
+
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetStatus')
+            ->with('pending')
+            ->willReturn(\App\Enum\ProgressStatus::PENDING);
+
+        $this->progressFactory->expects($this->once())
+            ->method('create')
+            ->with($user, $lesson, 'test-request-789', \App\Enum\ProgressStatus::PENDING)
+            ->willReturn($progress);
+
+        $this->entityManager->expects($this->once())
+            ->method('persist')
+            ->with($progress);
+
+        $this->entityManager->expects($this->once())
+            ->method('flush');
+
+        $result = $this->progressService->createProgress(1, 1, 'test-request-789', 'pending');
+        $this->assertInstanceOf(Progress::class, $result);
+    }
+
     public function testCreateProgressUserNotFound(): void
     {
         $this->progressRepository->expects($this->once())

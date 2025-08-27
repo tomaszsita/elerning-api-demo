@@ -39,9 +39,21 @@ class ProgressService
 
     public function createProgress(int $userId, int $lessonId, string $requestId, string $action = 'complete'): Progress
     {
-        $existingProgress = $this->progressRepository->findByRequestId($requestId);
+        // Check if progress already exists for this user/lesson
+        $existingProgress = $this->progressRepository->findByUserAndLesson($userId, $lessonId);
         if ($existingProgress) {
+            // Update status if different
+            $newStatus = $this->validationService->validateAndGetStatus($action);
+            if ($existingProgress->getStatus() !== $newStatus) {
+                $this->updateProgressStatus($existingProgress, $newStatus, $requestId);
+            }
             return $existingProgress;
+        }
+
+        // Check if request_id already exists (idempotency)
+        $existingByRequestId = $this->progressRepository->findByRequestId($requestId);
+        if ($existingByRequestId) {
+            return $existingByRequestId;
         }
 
         $user = $this->validationService->validateAndGetUser($userId);

@@ -98,6 +98,52 @@ class ProgressControllerTest extends AbstractFeature
         $this->assertEquals('Invalid JSON', $responseData['error']);
     }
 
+    #[DataProvider('actionProvider')]
+    public function testCreateProgressWithDifferentActions(string $action, string $expectedStatus): void
+    {
+        $user = $this->getTestUser();
+        $course = $this->getTestCourse();
+        $lesson = $this->getTestLesson();
+
+        // Enroll user in course first
+        $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'user_id' => $user->getId(),
+        ]));
+
+        $this->assertResponseStatusCodeSame(201);
+
+        $this->client->request('POST', '/progress', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'user_id' => $user->getId(),
+            'lesson_id' => $lesson->getId(),
+            'action' => $action,
+            'request_id' => 'test-request-' . $action,
+        ]));
+
+        $this->assertResponseStatusCodeSame(201);
+        
+        $responseData = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('id', $responseData);
+        $this->assertEquals($user->getId(), $responseData['user_id']);
+        $this->assertEquals($lesson->getId(), $responseData['lesson_id']);
+        $this->assertEquals('Test Lesson', $responseData['lesson_title']);
+        $this->assertEquals($expectedStatus, $responseData['status']);
+        $this->assertEquals('test-request-' . $action, $responseData['request_id']);
+        $this->assertArrayHasKey('completed_at', $responseData);
+    }
+
+    public static function actionProvider(): array
+    {
+        return [
+            'complete action' => ['complete', 'complete'],
+            'failed action' => ['failed', 'failed'],
+            'pending action' => ['pending', 'pending'],
+        ];
+    }
+
     #[DataProvider('validationErrorsProvider')]
     public function testCreateProgressValidationErrors(array $invalidData): void
     {
