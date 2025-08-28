@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<ruleset name="PWC E-Learning API">
+    <description>PHP Code Sniffer rules for PWC E-Learning API project</description>
+
+    <!-- Include PSR-12 standard -->
+    <rule ref="PSR12"/>
+
+    <!-- Include Symfony coding standards -->
+    <rule ref="Symfony"/>
+
+    <!-- Exclude some Symfony rules that might conflict with PSR-12 -->
+    <rule ref="Symfony.Classes.PropertyDeclaration">
+        <exclude name="Symfony.Classes.PropertyDeclaration.NoUnderscore"/>
+    </rule>
+
+    <!-- Define paths to check -->
+    <file>src/</file>
+    <file>tests/</file>
+
+    <!-- Exclude vendor directory -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/var/*</exclude-pattern>
+    <exclude-pattern>*/migrations/*</exclude-pattern>
+
+    <!-- Show progress -->
+    <arg value="p"/>
+
+    <!-- Show sniff codes in all reports -->
+    <arg value="s"/>
+
+    <!-- Show colors in console -->
+    <arg value="n"/>
+
+    <!-- Show source codes in all reports -->
+    <arg value="v"/>
+</ruleset>

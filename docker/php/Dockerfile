@@ -26,6 +26,9 @@ COPY . /var/www
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
+# Install dev dependencies for code quality tools
+RUN composer install --dev --no-interaction --no-progress --prefer-dist
+
 # Change ownership of our applications
 RUN chown -R www-data:www-data /var/www
 

@@ -62,7 +62,11 @@
         "test": "phpunit",
         "test:coverage": "phpunit --coverage-html coverage",
         "phpstan": "phpstan analyse",
-        "phpstan:baseline": "phpstan analyse --generate-baseline"
+        "phpstan:baseline": "phpstan analyse --generate-baseline",
+        "phpcs": "phpcs --standard=phpcs.xml",
+        "phpcs:fix": "phpcbf --standard=phpcs.xml",
+        "php-cs-fixer": "php-cs-fixer fix",
+        "php-cs-fixer:check": "php-cs-fixer fix --dry-run --diff"
     },
     "conflict": {
         "symfony/symfony": "*"
@@ -77,6 +81,9 @@
         "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^12.3",
         "symfony/browser-kit": "7.*",
-        "symfony/css-selector": "7.*"
+        "symfony/css-selector": "7.*",
+        "squizlabs/php_codesniffer": "^3.8",
+        "friendsofphp/php-cs-fixer": "^3.50",
+        "escapestudios/symfony2-coding-standard": "^3.12"
     }
 }
