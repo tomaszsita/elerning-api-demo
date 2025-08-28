@@ -18,6 +18,8 @@ install: ## Install dependencies
 	docker-compose exec app composer install
 
 test: ## Run tests
+	docker-compose exec app bin/console doctrine:database:create --env=test --if-not-exists
+	docker-compose exec app bin/console doctrine:migrations:migrate --env=test --no-interaction
 	docker-compose exec app composer test
 
 phpcs: ## Run PHP Code Sniffer
