@@ -10,7 +10,6 @@ setup: ## Setup project (install deps, create DBs, run migrations, load data)
 	@echo "Setting up project..."
 	docker-compose exec app composer install
 	docker-compose exec app bin/console doctrine:migrations:migrate --no-interaction
-	docker-compose exec app bin/console doctrine:migrations:migrate --env=test --no-interaction
 	docker-compose exec app bin/console app:load-test-data
 	@echo "Setup complete!"
 
@@ -19,7 +18,6 @@ install: ## Install dependencies
 
 test: ## Run tests
 	docker-compose exec app bin/console doctrine:database:create --env=test --if-not-exists
-	docker-compose exec app bin/console doctrine:migrations:migrate --env=test --no-interaction
 	docker-compose exec app composer test
 
 phpcs: ## Run PHP Code Sniffer
