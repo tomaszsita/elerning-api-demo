@@ -1,4 +1,4 @@
-.PHONY: help install test phpcs phpcbf php-cs-fixer phpstan build up down
+.PHONY: setup help install test phpcs phpcbf php-cs-fixer phpstan build up down
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -6,6 +6,13 @@ help: ## Show this help message
 	@echo 'Targets:'
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
+setup: ## Setup project (install deps, create DBs, run migrations, load data)
+	@echo "Setting up project..."
+	docker-compose exec app composer install
+	docker-compose exec app bin/console doctrine:migrations:migrate
+	docker-compose exec app bin/console doctrine:migrations:migrate --env=test
+	docker-compose exec app bin/console app:load-test-data
+	@echo "Setup complete!"
 install: ## Install dependencies
 	docker-compose exec app composer install
 
