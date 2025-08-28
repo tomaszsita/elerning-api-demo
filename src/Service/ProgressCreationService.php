@@ -42,14 +42,14 @@ class ProgressCreationService
         // If request_id exists, check if it matches the same user/lesson
         $user = $existingProgress->getUser();
         $lesson = $existingProgress->getLesson();
-        
+
         if (!$user || !$lesson) {
             throw new \InvalidArgumentException('Progress must have user and lesson');
         }
-        
+
         $userIdMatches = $user->getId() === $userId;
         $lessonIdMatches = $lesson->getId() === $lessonId;
-        
+
         if ($userIdMatches && $lessonIdMatches) {
             return $existingProgress; // Idempotency - return existing result
         } else {

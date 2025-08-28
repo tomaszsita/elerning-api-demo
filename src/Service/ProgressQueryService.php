@@ -49,6 +49,7 @@ class ProgressQueryService
         $totalLessons = count($course->getLessons());
         $completedLessons = count(array_filter($progressList, function ($p) {
             $status = $p->getStatus();
+
             return $status && 'complete' === $status->value;
         }));
         $percent = $totalLessons > 0 ? (int) round(($completedLessons / $totalLessons) * 100) : 0;
@@ -57,6 +58,7 @@ class ProgressQueryService
         foreach ($course->getLessons() as $lesson) {
             $progress = array_filter($progressList, function ($p) use ($lesson) {
                 $progressLesson = $p->getLesson();
+
                 return $progressLesson && $progressLesson->getId() === $lesson->getId();
             });
             $status = 'pending';
@@ -71,7 +73,7 @@ class ProgressQueryService
             if (!$lessonId) {
                 throw new \InvalidArgumentException('Lesson must have an ID');
             }
-            
+
             $lessonsData[] = [
                 'id'     => $lessonId,
                 'status' => $status,

@@ -61,12 +61,12 @@ class ValidationService
         if (!$course) {
             throw new EntityNotFoundException('Course', 0);
         }
-        
+
         $courseId = $course->getId();
         if (!$courseId) {
             throw new EntityNotFoundException('Course', 0);
         }
-        
+
         if (!$this->enrollmentRepository->existsByUserAndCourse($userId, $courseId)) {
             throw new EnrollmentException(EnrollmentException::NOT_ENROLLED, $userId, $courseId);
         }

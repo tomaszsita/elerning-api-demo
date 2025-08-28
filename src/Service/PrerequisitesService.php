@@ -24,9 +24,9 @@ class PrerequisitesService
         if (!$course) {
             throw new \InvalidArgumentException('Lesson must have a course');
         }
-        
+
         $currentOrderIndex = $lesson->getOrderIndex();
-        if ($currentOrderIndex === null) {
+        if (null === $currentOrderIndex) {
             throw new \InvalidArgumentException('Lesson must have an order index');
         }
 
@@ -34,7 +34,7 @@ class PrerequisitesService
         if (!$courseId) {
             throw new \InvalidArgumentException('Course must have an ID');
         }
-        
+
         $prerequisiteLessons = $this->lessonRepository->findByCourseAndOrderLessThan(
             $courseId,
             $currentOrderIndex
@@ -45,7 +45,7 @@ class PrerequisitesService
             if (!$lessonId) {
                 throw new \InvalidArgumentException('Prerequisite lesson must have an ID');
             }
-            
+
             $progress = $this->progressRepository->findByUserAndLesson($userId, $lessonId);
 
             if (!$progress || !in_array($progress->getStatus(), [ProgressStatus::COMPLETE, ProgressStatus::FAILED])) {
@@ -53,7 +53,7 @@ class PrerequisitesService
                 if (!$currentLessonId) {
                     throw new \InvalidArgumentException('Current lesson must have an ID');
                 }
-                
+
                 throw new PrerequisitesNotMetException($userId, $currentLessonId, "User {$userId} must complete lesson '{$prerequisiteLesson->getTitle()}' before accessing lesson '{$lesson->getTitle()}'");
             }
         }

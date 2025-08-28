@@ -60,7 +60,7 @@ class ProgressStatusService
         if (!$status) {
             throw new \InvalidArgumentException('Progress status cannot be null');
         }
-        
+
         $event = $this->progressChangedEventFactory->create($progress, null, $status->value, $requestId);
         $this->eventDispatcher->dispatch($event, ProgressChangedEvent::NAME);
     }
