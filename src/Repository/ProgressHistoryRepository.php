@@ -38,17 +38,4 @@ class ProgressHistoryRepository extends ServiceEntityRepository implements Progr
             ->getQuery()
             ->getResult();
     }
-
-    /**
-     * @return ProgressHistory[]
-     */
-    public function findByProgress(int $progressId): array
-    {
-        return $this->createQueryBuilder('ph')
-            ->andWhere('ph.progress = :progressId')
-            ->setParameter('progressId', $progressId)
-            ->orderBy('ph.changedAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-    }
 }

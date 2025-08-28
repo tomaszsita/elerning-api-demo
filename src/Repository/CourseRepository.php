@@ -37,25 +37,6 @@ class CourseRepository extends ServiceEntityRepository implements CourseReposito
         return (int) $result;
     }
 
-    public function save(Course $course): void
-    {
-        $this->getEntityManager()->persist($course);
-        $this->getEntityManager()->flush();
-    }
-
-    /**
-     * @return Course[]
-     */
-    public function findByUser(int $userId): array
-    {
-        return $this->createQueryBuilder('c')
-            ->join('c.enrollments', 'e')
-            ->where('e.user = :userId')
-            ->setParameter('userId', $userId)
-            ->getQuery()
-            ->getResult();
-    }
-
     /**
      * @return Course[]
      */

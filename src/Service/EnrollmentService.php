@@ -82,11 +82,6 @@ class EnrollmentService
         return $this->enrollmentRepository->findByUser($userId);
     }
 
-    public function isUserEnrolled(int $userId, int $courseId): bool
-    {
-        return $this->enrollmentRepository->existsByUserAndCourse($userId, $courseId);
-    }
-
     /**
      * @return Course[]
      */

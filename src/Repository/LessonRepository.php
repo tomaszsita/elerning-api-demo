@@ -24,12 +24,6 @@ class LessonRepository extends ServiceEntityRepository implements LessonReposito
         parent::__construct($registry, Lesson::class);
     }
 
-    public function save(Lesson $lesson): void
-    {
-        $this->getEntityManager()->persist($lesson);
-        $this->getEntityManager()->flush();
-    }
-
     /**
      * @return Lesson[]
      */

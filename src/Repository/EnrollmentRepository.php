@@ -49,10 +49,4 @@ class EnrollmentRepository extends ServiceEntityRepository implements Enrollment
             ->getQuery()
             ->getResult();
     }
-
-    public function save(Enrollment $enrollment): void
-    {
-        $this->getEntityManager()->persist($enrollment);
-        $this->getEntityManager()->flush();
-    }
 }

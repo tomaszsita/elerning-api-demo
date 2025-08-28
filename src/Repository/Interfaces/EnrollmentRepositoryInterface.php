@@ -14,6 +14,4 @@ interface EnrollmentRepositoryInterface
      * @return Enrollment[]
      */
     public function findByUser(int $userId): array;
-
-    public function save(Enrollment $enrollment): void;
 }
