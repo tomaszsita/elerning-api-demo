@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ProgressRepository::class)]
 #[ORM\Table(name: 'progress')]
 #[ORM\UniqueConstraint(name: 'unique_user_lesson', columns: ['user_id', 'lesson_id'])]
+#[ORM\UniqueConstraint(name: 'unique_request_id', columns: ['request_id'])]
 class Progress implements \JsonSerializable
 {
     #[ORM\Id]

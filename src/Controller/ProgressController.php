@@ -49,6 +49,8 @@ class ProgressController
             return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
         }
 
+        $isIdempotent = $this->progressService->isIdempotentRequest($createRequest->requestId);
+        
         $progress = $this->progressService->createProgress(
             $createRequest->userId,
             $createRequest->lessonId,
@@ -56,7 +58,7 @@ class ProgressController
             $createRequest->action
         );
 
-        return new JsonResponse($progress->toArray(), Response::HTTP_CREATED);
+        return new JsonResponse($progress->toArray(), $isIdempotent ? Response::HTTP_OK : Response::HTTP_CREATED);
     }
 
     #[Route('/{user_id}/courses/{course_id}', methods: ['GET'])]

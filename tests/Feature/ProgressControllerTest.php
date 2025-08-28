@@ -68,7 +68,6 @@ class ProgressControllerTest extends AbstractFeature
         $this->assertResponseStatusCodeSame(201);
         $firstResponse = json_decode($this->client->getResponse()->getContent(), true);
 
-
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
@@ -77,12 +76,60 @@ class ProgressControllerTest extends AbstractFeature
             'request_id' => $requestId,
         ]));
 
-        $this->assertResponseStatusCodeSame(201);
+        $this->assertResponseStatusCodeSame(200); // Changed from 201 to 200 for idempotency
         $secondResponse = json_decode($this->client->getResponse()->getContent(), true);
-
 
         $this->assertEquals($firstResponse['id'], $secondResponse['id']);
         $this->assertEquals($firstResponse['request_id'], $secondResponse['request_id']);
+    }
+
+    public function testCreateProgressRequestIdConflict(): void
+    {
+        $user1 = $this->getTestUser();
+        $user2 = $this->createTestUser('Jane Smith', 'jane.smith@example.com');
+        $course = $this->getTestCourse();
+        $lesson1 = $this->getTestLesson();
+        $lesson2 = $this->createTestLesson('Test Lesson 2', $course, 2);
+        $requestId = 'conflict-test-123';
+
+        // Enroll both users
+        $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'user_id' => $user1->getId(),
+        ]));
+
+        $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'user_id' => $user2->getId(),
+        ]));
+
+        // First request - creates progress
+        $this->client->request('POST', '/progress', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'user_id' => $user1->getId(),
+            'lesson_id' => $lesson1->getId(),
+            'request_id' => $requestId,
+        ]));
+
+        $this->assertResponseStatusCodeSame(201);
+
+        // Second request with same request_id but different user/lesson - should conflict
+        $this->client->request('POST', '/progress', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'user_id' => $user2->getId(),
+            'lesson_id' => $lesson2->getId(),
+            'request_id' => $requestId,
+        ]));
+
+        $this->assertResponseStatusCodeSame(409);
+        
+        $responseData = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertArrayHasKey('error', $responseData);
+        $this->assertStringContainsString('already exists with different user/lesson combination', $responseData['error']);
     }
 
     public function testCreateProgressInvalidJson(): void

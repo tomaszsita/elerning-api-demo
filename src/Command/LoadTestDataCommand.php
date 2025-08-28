@@ -37,12 +37,12 @@ class LoadTestDataCommand extends Command
         try {
             // Create users
             $users = $this->createUsers($io);
-            
+
             // Create courses with lessons
             $courses = $this->createCourses($io);
-            
+
             $this->entityManager->flush();
-            
+
             $io->success([
                 'Test data loaded successfully!',
                 sprintf('Created %d users', count($users)),
@@ -62,7 +62,7 @@ class LoadTestDataCommand extends Command
     private function createUsers(SymfonyStyle $io): array
     {
         $io->section('Creating users...');
-        
+
         $users = [];
         $userData = [
             ['email' => 'john.doe@example.com', 'name' => 'John Doe'],
@@ -73,10 +73,10 @@ class LoadTestDataCommand extends Command
 
         foreach ($userData as $data) {
             $user = $this->testDataFactory->createUser($data['name'], $data['email']);
-            
+
             $this->entityManager->persist($user);
             $users[] = $user;
-            
+
             $io->text(sprintf('Created user: %s (%s)', $data['name'], $data['email']));
         }
 
@@ -89,13 +89,13 @@ class LoadTestDataCommand extends Command
     private function createCourses(SymfonyStyle $io): array
     {
         $io->section('Creating courses with lessons...');
-        
+
         $courses = [];
         $courseData = [
             [
                 'title' => 'PHP Fundamentals',
                 'description' => 'Learn the basics of PHP programming',
-                'maxSeats' => 20,
+                'maxSeats' => 5,
                 'lessons' => [
                     ['title' => 'Introduction to PHP', 'content' => 'PHP is a server-side scripting language...'],
                     ['title' => 'Variables and Data Types', 'content' => 'PHP supports various data types...'],
@@ -105,7 +105,7 @@ class LoadTestDataCommand extends Command
             [
                 'title' => 'Symfony Framework',
                 'description' => 'Master the Symfony PHP framework',
-                'maxSeats' => 15,
+                'maxSeats' => 10,
                 'lessons' => [
                     ['title' => 'Symfony Overview', 'content' => 'Symfony is a PHP framework...'],
                     ['title' => 'Routing and Controllers', 'content' => 'Learn about routing...'],
@@ -116,7 +116,7 @@ class LoadTestDataCommand extends Command
             [
                 'title' => 'Database Design',
                 'description' => 'Learn database design principles',
-                'maxSeats' => 25,
+                'maxSeats' => 15,
                 'lessons' => [
                     ['title' => 'Database Fundamentals', 'content' => 'Understanding databases...'],
                     ['title' => 'Normalization', 'content' => 'Database normalization rules...'],
@@ -131,9 +131,9 @@ class LoadTestDataCommand extends Command
                 $data['description'],
                 $data['maxSeats']
             );
-            
+
             $this->entityManager->persist($course);
-            
+
             // Create lessons for this course
             foreach ($data['lessons'] as $index => $lessonData) {
                 $lesson = $this->testDataFactory->createLesson(
@@ -142,12 +142,12 @@ class LoadTestDataCommand extends Command
                     $index + 1,
                     $course
                 );
-                
+
                 $this->entityManager->persist($lesson);
             }
-            
+
             $courses[] = $course;
-            
+
             $io->text(sprintf(
                 'Created course: %s (%d lessons, %d max seats)',
                 $data['title'],

@@ -97,6 +97,19 @@ abstract class AbstractFeature extends WebTestCase
         return $course;
     }
 
+    protected function createTestLesson(string $title, Course $course, int $orderIndex): Lesson
+    {
+        $lesson = new Lesson();
+        $lesson->setTitle($title);
+        $lesson->setContent('Test lesson content');
+        $lesson->setOrderIndex($orderIndex);
+        $lesson->setCourse($course);
+        $this->entityManager->persist($lesson);
+        $this->entityManager->flush();
+        
+        return $lesson;
+    }
+
     private function cleanupDatabase(): void
     {
         $this->entityManager->createQuery('DELETE FROM App\Entity\Progress')->execute();

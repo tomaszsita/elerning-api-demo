@@ -15,6 +15,14 @@ Created factories for Progress, Enrollment, ProgressHistory, ProgressChangedEven
 
 **Trade-off**: More files, but services are cleaner and more testable.
 
+### Service Refactoring
+Split the large `ProgressService` into three focused services:
+- `ProgressCreationService`: Handles progress creation logic and idempotency
+- `ProgressStatusService`: Manages status changes and event dispatching  
+- `ProgressQueryService`: Handles progress queries and summary calculations
+
+**Trade-off**: More services, but each has a single responsibility and is easier to test and maintain.
+
 ### Repository Interfaces
 All repositories implement interfaces. This makes testing easier (can mock them) and follows DI principles.
 
