@@ -21,18 +21,40 @@ class PrerequisitesService
     public function checkPrerequisites(int $userId, Lesson $lesson): void
     {
         $course = $lesson->getCourse();
+        if (!$course) {
+            throw new \InvalidArgumentException('Lesson must have a course');
+        }
+        
         $currentOrderIndex = $lesson->getOrderIndex();
+        if ($currentOrderIndex === null) {
+            throw new \InvalidArgumentException('Lesson must have an order index');
+        }
 
+        $courseId = $course->getId();
+        if (!$courseId) {
+            throw new \InvalidArgumentException('Course must have an ID');
+        }
+        
         $prerequisiteLessons = $this->lessonRepository->findByCourseAndOrderLessThan(
-            $course->getId(),
+            $courseId,
             $currentOrderIndex
         );
 
         foreach ($prerequisiteLessons as $prerequisiteLesson) {
-            $progress = $this->progressRepository->findByUserAndLesson($userId, $prerequisiteLesson->getId());
+            $lessonId = $prerequisiteLesson->getId();
+            if (!$lessonId) {
+                throw new \InvalidArgumentException('Prerequisite lesson must have an ID');
+            }
+            
+            $progress = $this->progressRepository->findByUserAndLesson($userId, $lessonId);
 
             if (!$progress || !in_array($progress->getStatus(), [ProgressStatus::COMPLETE, ProgressStatus::FAILED])) {
-                throw new PrerequisitesNotMetException($userId, $lesson->getId(), "User {$userId} must complete lesson '{$prerequisiteLesson->getTitle()}' before accessing lesson '{$lesson->getTitle()}'");
+                $currentLessonId = $lesson->getId();
+                if (!$currentLessonId) {
+                    throw new \InvalidArgumentException('Current lesson must have an ID');
+                }
+                
+                throw new PrerequisitesNotMetException($userId, $currentLessonId, "User {$userId} must complete lesson '{$prerequisiteLesson->getTitle()}' before accessing lesson '{$lesson->getTitle()}'");
             }
         }
     }

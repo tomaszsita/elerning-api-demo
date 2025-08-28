@@ -52,10 +52,10 @@ class ProgressServiceTest extends TestCase
     {
         $this->progressCreationService->expects($this->once())
             ->method('isIdempotentRequest')
-            ->with('test-request-123')
+            ->with('test-request-123', 1, 1, 'complete')
             ->willReturn(true);
 
-        $result = $this->progressService->isIdempotentRequest('test-request-123');
+        $result = $this->progressService->isIdempotentRequest('test-request-123', 1, 1, 'complete');
 
         $this->assertTrue($result);
     }

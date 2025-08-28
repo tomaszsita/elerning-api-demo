@@ -24,6 +24,7 @@ class ValidationService
 
     public function validateAndGetUser(int $userId): User
     {
+        /** @var User|null $user */
         $user = $this->entityManager->find(User::class, $userId);
         if (!$user) {
             throw new EntityNotFoundException('User', $userId);
@@ -34,6 +35,7 @@ class ValidationService
 
     public function validateAndGetLesson(int $lessonId): Lesson
     {
+        /** @var Lesson|null $lesson */
         $lesson = $this->entityManager->find(Lesson::class, $lessonId);
         if (!$lesson) {
             throw new EntityNotFoundException('Lesson', $lessonId);
@@ -44,6 +46,7 @@ class ValidationService
 
     public function validateAndGetCourse(int $courseId): Course
     {
+        /** @var Course|null $course */
         $course = $this->entityManager->find(Course::class, $courseId);
         if (!$course) {
             throw new EntityNotFoundException('Course', $courseId);
@@ -54,8 +57,18 @@ class ValidationService
 
     public function validateEnrollment(int $userId, Lesson $lesson): void
     {
-        if (!$this->enrollmentRepository->existsByUserAndCourse($userId, $lesson->getCourse()->getId())) {
-            throw new EnrollmentException(EnrollmentException::NOT_ENROLLED, $userId, $lesson->getCourse()->getId());
+        $course = $lesson->getCourse();
+        if (!$course) {
+            throw new EntityNotFoundException('Course', 0);
+        }
+        
+        $courseId = $course->getId();
+        if (!$courseId) {
+            throw new EntityNotFoundException('Course', 0);
+        }
+        
+        if (!$this->enrollmentRepository->existsByUserAndCourse($userId, $courseId)) {
+            throw new EnrollmentException(EnrollmentException::NOT_ENROLLED, $userId, $courseId);
         }
     }
 

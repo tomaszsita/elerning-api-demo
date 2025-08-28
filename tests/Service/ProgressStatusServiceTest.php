@@ -10,7 +10,6 @@ use App\Event\ProgressChangedEvent;
 use App\Factory\ProgressChangedEventFactory;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
 use App\Service\ProgressStatusService;
-use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -20,8 +19,6 @@ class ProgressStatusServiceTest extends TestCase
 
     private ProgressRepositoryInterface $progressRepository;
 
-    private EntityManagerInterface $entityManager;
-
     private EventDispatcherInterface $eventDispatcher;
 
     private ProgressChangedEventFactory $progressChangedEventFactory;
@@ -29,13 +26,11 @@ class ProgressStatusServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->progressRepository = $this->createMock(ProgressRepositoryInterface::class);
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $this->progressChangedEventFactory = $this->createMock(ProgressChangedEventFactory::class);
 
         $this->progressStatusService = new ProgressStatusService(
             $this->progressRepository,
-            $this->entityManager,
             $this->eventDispatcher,
             $this->progressChangedEventFactory
         );
@@ -58,8 +53,9 @@ class ProgressStatusServiceTest extends TestCase
             ->method('setCompletedAt')
             ->with($this->isInstanceOf(\DateTimeImmutable::class));
 
-        $this->entityManager->expects($this->once())
-            ->method('flush');
+        $this->progressRepository->expects($this->once())
+            ->method('save')
+            ->with($progress);
 
         $this->progressChangedEventFactory->expects($this->once())
             ->method('create')
@@ -90,8 +86,9 @@ class ProgressStatusServiceTest extends TestCase
             ->method('setCompletedAt')
             ->with(null);
 
-        $this->entityManager->expects($this->once())
-            ->method('flush');
+        $this->progressRepository->expects($this->once())
+            ->method('save')
+            ->with($progress);
 
         $this->progressChangedEventFactory->expects($this->once())
             ->method('create')
@@ -121,8 +118,9 @@ class ProgressStatusServiceTest extends TestCase
         $progress->expects($this->never())
             ->method('setCompletedAt');
 
-        $this->entityManager->expects($this->once())
-            ->method('flush');
+        $this->progressRepository->expects($this->once())
+            ->method('save')
+            ->with($progress);
 
         $this->progressChangedEventFactory->expects($this->once())
             ->method('create')
@@ -153,8 +151,9 @@ class ProgressStatusServiceTest extends TestCase
             ->method('setCompletedAt')
             ->with($this->isInstanceOf(\DateTimeImmutable::class));
 
-        $this->entityManager->expects($this->once())
-            ->method('flush');
+        $this->progressRepository->expects($this->once())
+            ->method('save')
+            ->with($progress);
 
         $this->progressChangedEventFactory->expects($this->once())
             ->method('create')
@@ -189,8 +188,9 @@ class ProgressStatusServiceTest extends TestCase
             ->method('setCompletedAt')
             ->with(null);
 
-        $this->entityManager->expects($this->once())
-            ->method('flush');
+        $this->progressRepository->expects($this->once())
+            ->method('save')
+            ->with($progress);
 
         $this->progressStatusService->deleteProgress(1, 1);
     }
@@ -216,8 +216,9 @@ class ProgressStatusServiceTest extends TestCase
             ->method('setCompletedAt')
             ->with(null);
 
-        $this->entityManager->expects($this->once())
-            ->method('flush');
+        $this->progressRepository->expects($this->once())
+            ->method('save')
+            ->with($progress);
 
         $this->progressStatusService->deleteProgress(1, 1);
     }
@@ -239,8 +240,8 @@ class ProgressStatusServiceTest extends TestCase
         $progress->expects($this->never())
             ->method('setStatus');
 
-        $this->entityManager->expects($this->never())
-            ->method('flush');
+        $this->progressRepository->expects($this->never())
+            ->method('save');
 
         $this->progressStatusService->deleteProgress(1, 1);
     }
@@ -252,8 +253,8 @@ class ProgressStatusServiceTest extends TestCase
             ->with(1, 1)
             ->willReturn(null);
 
-        $this->entityManager->expects($this->never())
-            ->method('flush');
+        $this->progressRepository->expects($this->never())
+            ->method('save');
 
         $this->progressStatusService->deleteProgress(1, 1);
     }

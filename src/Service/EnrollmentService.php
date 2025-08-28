@@ -31,6 +31,7 @@ class EnrollmentService
             throw new EntityNotFoundException('User', $userId);
         }
 
+        /** @var Course|null $course */
         $course = $this->entityManager->find(Course::class, $courseId);
         if (!$course) {
             throw new EntityNotFoundException('Course', $courseId);
@@ -44,7 +45,11 @@ class EnrollmentService
         $this->entityManager->beginTransaction();
 
         try {
+            /** @var Course|null $course */
             $course = $this->entityManager->find(Course::class, $courseId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE);
+            if (!$course) {
+                throw new EntityNotFoundException('Course', $courseId);
+            }
 
             $enrollmentCount = $this->courseRepository->countEnrollmentsByCourse($courseId);
             if ($enrollmentCount >= $course->getMaxSeats()) {

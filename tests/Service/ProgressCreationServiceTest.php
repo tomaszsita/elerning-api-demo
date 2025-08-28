@@ -16,8 +16,8 @@ use App\Factory\ProgressFactory;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
 use App\Service\PrerequisitesService;
 use App\Service\ProgressCreationService;
+use App\Service\ProgressStatusService;
 use App\Service\ValidationService;
-use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 
 class ProgressCreationServiceTest extends TestCase
@@ -28,26 +28,26 @@ class ProgressCreationServiceTest extends TestCase
 
     private PrerequisitesService $prerequisitesService;
 
+    private ProgressStatusService $progressStatusService;
+
     private ProgressFactory $progressFactory;
 
     private ProgressRepositoryInterface $progressRepository;
-
-    private EntityManagerInterface $entityManager;
 
     protected function setUp(): void
     {
         $this->validationService = $this->createMock(ValidationService::class);
         $this->prerequisitesService = $this->createMock(PrerequisitesService::class);
+        $this->progressStatusService = $this->createMock(ProgressStatusService::class);
         $this->progressFactory = $this->createMock(ProgressFactory::class);
         $this->progressRepository = $this->createMock(ProgressRepositoryInterface::class);
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
 
         $this->progressCreationService = new ProgressCreationService(
             $this->validationService,
             $this->prerequisitesService,
+            $this->progressStatusService,
             $this->progressFactory,
-            $this->progressRepository,
-            $this->entityManager
+            $this->progressRepository
         );
     }
 
@@ -95,12 +95,13 @@ class ProgressCreationServiceTest extends TestCase
             ->with($user, $lesson, 'test-request-123', ProgressStatus::COMPLETE)
             ->willReturn($progress);
 
-        $this->entityManager->expects($this->once())
-            ->method('persist')
+        $this->progressRepository->expects($this->once())
+            ->method('save')
             ->with($progress);
 
-        $this->entityManager->expects($this->once())
-            ->method('flush');
+        $this->progressStatusService->expects($this->once())
+            ->method('dispatchProgressCreatedEvent')
+            ->with($progress, 'test-request-123');
 
         $result = $this->progressCreationService->createProgress(1, 1, 'test-request-123', 'complete');
 
@@ -149,12 +150,17 @@ class ProgressCreationServiceTest extends TestCase
             ->method('getUser')
             ->willReturn($user);
 
-        $existingProgress->expects($this->never())
-            ->method('getLesson');
+        $existingProgress->expects($this->once())
+            ->method('getLesson')
+            ->willReturn($lesson);
 
         $user->expects($this->once())
             ->method('getId')
             ->willReturn(2); // Different user
+
+        $lesson->expects($this->once())
+            ->method('getId')
+            ->willReturn(1); // Same lesson
 
         $this->progressRepository->expects($this->once())
             ->method('findByRequestId')
@@ -176,17 +182,6 @@ class ProgressCreationServiceTest extends TestCase
             ->method('getStatus')
             ->willReturn(ProgressStatus::COMPLETE);
 
-        $existingProgress->expects($this->once())
-            ->method('setStatus')
-            ->with($newStatus);
-
-        $existingProgress->expects($this->once())
-            ->method('setRequestId')
-            ->with('test-request-123');
-
-        $existingProgress->expects($this->never())
-            ->method('setCompletedAt');
-
         $this->progressRepository->expects($this->once())
             ->method('findByRequestId')
             ->with('test-request-123')
@@ -202,8 +197,9 @@ class ProgressCreationServiceTest extends TestCase
             ->with('failed')
             ->willReturn($newStatus);
 
-        $this->entityManager->expects($this->once())
-            ->method('flush');
+        $this->progressStatusService->expects($this->once())
+            ->method('updateProgressStatus')
+            ->with($existingProgress, $newStatus, 'test-request-123');
 
         $result = $this->progressCreationService->createProgress(1, 1, 'test-request-123', 'failed');
 
@@ -218,18 +214,6 @@ class ProgressCreationServiceTest extends TestCase
         $existingProgress->expects($this->once())
             ->method('getStatus')
             ->willReturn(ProgressStatus::COMPLETE);
-
-        $existingProgress->expects($this->once())
-            ->method('setStatus')
-            ->with($newStatus);
-
-        $existingProgress->expects($this->once())
-            ->method('setRequestId')
-            ->with('test-request-123');
-
-        $existingProgress->expects($this->once())
-            ->method('setCompletedAt')
-            ->with(null);
 
         $this->progressRepository->expects($this->once())
             ->method('findByRequestId')
@@ -246,8 +230,9 @@ class ProgressCreationServiceTest extends TestCase
             ->with('pending')
             ->willReturn($newStatus);
 
-        $this->entityManager->expects($this->once())
-            ->method('flush');
+        $this->progressStatusService->expects($this->once())
+            ->method('updateProgressStatus')
+            ->with($existingProgress, $newStatus, 'test-request-123');
 
         $result = $this->progressCreationService->createProgress(1, 1, 'test-request-123', 'pending');
 
@@ -379,26 +364,87 @@ class ProgressCreationServiceTest extends TestCase
         $this->progressCreationService->createProgress(1, 1, 'test-request-123', 'complete');
     }
 
-    public function testIsIdempotentRequest(): void
+    public function testIsIdempotentRequestByRequestId(): void
     {
         $this->progressRepository->expects($this->once())
             ->method('findByRequestId')
             ->with('test-request-123')
             ->willReturn($this->createMock(Progress::class));
 
-        $result = $this->progressCreationService->isIdempotentRequest('test-request-123');
+        $result = $this->progressCreationService->isIdempotentRequest('test-request-123', 1, 1, 'complete');
 
         $this->assertTrue($result);
     }
 
-    public function testIsIdempotentRequestReturnsFalse(): void
+    public function testIsIdempotentRequestBySameStatus(): void
+    {
+        $existingProgress = $this->createMock(Progress::class);
+
+        $this->progressRepository->expects($this->once())
+            ->method('findByRequestId')
+            ->with('test-request-123')
+            ->willReturn(null);
+
+        $this->progressRepository->expects($this->once())
+            ->method('findByUserAndLesson')
+            ->with(1, 1)
+            ->willReturn($existingProgress);
+
+        $existingProgress->expects($this->once())
+            ->method('getStatus')
+            ->willReturn(ProgressStatus::COMPLETE);
+
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetStatus')
+            ->with('complete')
+            ->willReturn(ProgressStatus::COMPLETE);
+
+        $result = $this->progressCreationService->isIdempotentRequest('test-request-123', 1, 1, 'complete');
+
+        $this->assertTrue($result);
+    }
+
+    public function testIsIdempotentRequestReturnsFalseForNewProgress(): void
     {
         $this->progressRepository->expects($this->once())
             ->method('findByRequestId')
             ->with('test-request-123')
             ->willReturn(null);
 
-        $result = $this->progressCreationService->isIdempotentRequest('test-request-123');
+        $this->progressRepository->expects($this->once())
+            ->method('findByUserAndLesson')
+            ->with(1, 1)
+            ->willReturn(null);
+
+        $result = $this->progressCreationService->isIdempotentRequest('test-request-123', 1, 1, 'complete');
+
+        $this->assertFalse($result);
+    }
+
+    public function testIsIdempotentRequestReturnsFalseForStatusChange(): void
+    {
+        $existingProgress = $this->createMock(Progress::class);
+
+        $this->progressRepository->expects($this->once())
+            ->method('findByRequestId')
+            ->with('test-request-123')
+            ->willReturn(null);
+
+        $this->progressRepository->expects($this->once())
+            ->method('findByUserAndLesson')
+            ->with(1, 1)
+            ->willReturn($existingProgress);
+
+        $existingProgress->expects($this->once())
+            ->method('getStatus')
+            ->willReturn(ProgressStatus::PENDING);
+
+        $this->validationService->expects($this->once())
+            ->method('validateAndGetStatus')
+            ->with('complete')
+            ->willReturn(ProgressStatus::COMPLETE);
+
+        $result = $this->progressCreationService->isIdempotentRequest('test-request-123', 1, 1, 'complete');
 
         $this->assertFalse($result);
     }

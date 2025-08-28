@@ -4,15 +4,15 @@ declare(strict_types = 1);
 
 namespace App\Service;
 
+use App\Repository\Interfaces\ProgressHistoryRepositoryInterface;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
-use Doctrine\ORM\EntityManagerInterface;
 
 class ProgressQueryService
 {
     public function __construct(
         private ValidationService $validationService,
         private ProgressRepositoryInterface $progressRepository,
-        private EntityManagerInterface $entityManager
+        private ProgressHistoryRepositoryInterface $progressHistoryRepository
     ) {
     }
 
@@ -34,10 +34,7 @@ class ProgressQueryService
         $this->validationService->validateAndGetUser($userId);
         $this->validationService->validateAndGetLesson($lessonId);
 
-        /** @var \App\Repository\ProgressHistoryRepository $repository */
-        $repository = $this->entityManager->getRepository(\App\Entity\ProgressHistory::class);
-
-        return $repository->findByUserAndLesson($userId, $lessonId);
+        return $this->progressHistoryRepository->findByUserAndLesson($userId, $lessonId);
     }
 
     /**
@@ -50,16 +47,33 @@ class ProgressQueryService
 
         $progressList = $this->getUserProgress($userId, $courseId);
         $totalLessons = count($course->getLessons());
-        $completedLessons = count(array_filter($progressList, fn ($p) => 'complete' === $p->getStatus()->value));
-        $percent = $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
+        $completedLessons = count(array_filter($progressList, function ($p) {
+            $status = $p->getStatus();
+            return $status && 'complete' === $status->value;
+        }));
+        $percent = $totalLessons > 0 ? (int) round(($completedLessons / $totalLessons) * 100) : 0;
 
         $lessonsData = [];
         foreach ($course->getLessons() as $lesson) {
-            $progress = array_filter($progressList, fn ($p) => $p->getLesson()->getId() === $lesson->getId());
-            $status = empty($progress) ? 'pending' : reset($progress)->getStatus()->value;
+            $progress = array_filter($progressList, function ($p) use ($lesson) {
+                $progressLesson = $p->getLesson();
+                return $progressLesson && $progressLesson->getId() === $lesson->getId();
+            });
+            $status = 'pending';
+            if (!empty($progress)) {
+                $progressStatus = reset($progress)->getStatus();
+                if ($progressStatus) {
+                    $status = $progressStatus->value;
+                }
+            }
 
+            $lessonId = $lesson->getId();
+            if (!$lessonId) {
+                throw new \InvalidArgumentException('Lesson must have an ID');
+            }
+            
             $lessonsData[] = [
-                'id'     => $lesson->getId(),
+                'id'     => $lessonId,
                 'status' => $status,
             ];
         }

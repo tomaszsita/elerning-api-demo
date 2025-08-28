@@ -10,11 +10,10 @@ use App\Entity\Progress;
 use App\Entity\ProgressHistory;
 use App\Entity\User;
 use App\Exception\EntityNotFoundException;
+use App\Repository\Interfaces\ProgressHistoryRepositoryInterface;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
-use App\Repository\ProgressHistoryRepository;
 use App\Service\ProgressQueryService;
 use App\Service\ValidationService;
-use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 
 class ProgressQueryServiceTest extends TestCase
@@ -25,21 +24,18 @@ class ProgressQueryServiceTest extends TestCase
 
     private ProgressRepositoryInterface $progressRepository;
 
-    private EntityManagerInterface $entityManager;
-
-    private ProgressHistoryRepository $progressHistoryRepository;
+    private ProgressHistoryRepositoryInterface $progressHistoryRepository;
 
     protected function setUp(): void
     {
         $this->validationService = $this->createMock(ValidationService::class);
         $this->progressRepository = $this->createMock(ProgressRepositoryInterface::class);
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->progressHistoryRepository = $this->createMock(ProgressHistoryRepository::class);
+        $this->progressHistoryRepository = $this->createMock(ProgressHistoryRepositoryInterface::class);
 
         $this->progressQueryService = new ProgressQueryService(
             $this->validationService,
             $this->progressRepository,
-            $this->entityManager
+            $this->progressHistoryRepository
         );
     }
 
@@ -90,11 +86,6 @@ class ProgressQueryServiceTest extends TestCase
             ->method('validateAndGetLesson')
             ->with(1)
             ->willReturn($lesson);
-
-        $this->entityManager->expects($this->once())
-            ->method('getRepository')
-            ->with(ProgressHistory::class)
-            ->willReturn($this->progressHistoryRepository);
 
         $this->progressHistoryRepository->expects($this->once())
             ->method('findByUserAndLesson')

@@ -39,6 +39,8 @@ services:
         alias: App\Repository\LessonRepository
     App\Repository\Interfaces\ProgressRepositoryInterface:
         alias: App\Repository\ProgressRepository
+    App\Repository\Interfaces\ProgressHistoryRepositoryInterface:
+        alias: App\Repository\ProgressHistoryRepository
 
     # Controllers
     App\Controller\:

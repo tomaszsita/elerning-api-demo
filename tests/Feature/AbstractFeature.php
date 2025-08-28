@@ -118,6 +118,7 @@ abstract class AbstractFeature extends WebTestCase
 
     private function cleanupDatabase(): void
     {
+        $this->entityManager->createQuery('DELETE FROM App\Entity\ProgressHistory')->execute();
         $this->entityManager->createQuery('DELETE FROM App\Entity\Progress')->execute();
         $this->entityManager->createQuery('DELETE FROM App\Entity\Enrollment')->execute();
         $this->entityManager->createQuery('DELETE FROM App\Entity\Lesson')->execute();

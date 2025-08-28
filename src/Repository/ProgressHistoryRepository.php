@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace App\Repository;
 
 use App\Entity\ProgressHistory;
+use App\Repository\Interfaces\ProgressHistoryRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,7 +17,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method ProgressHistory[]    findAll()
  * @method ProgressHistory[]    findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, int|null $limit = null, int|null $offset = null)
  */
-class ProgressHistoryRepository extends ServiceEntityRepository
+class ProgressHistoryRepository extends ServiceEntityRepository implements ProgressHistoryRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -33,7 +34,7 @@ class ProgressHistoryRepository extends ServiceEntityRepository
             ->andWhere('ph.lesson = :lessonId')
             ->setParameter('userId', $userId)
             ->setParameter('lessonId', $lessonId)
-            ->orderBy('ph.changedAt', 'DESC')
+            ->orderBy('ph.changedAt', 'ASC')
             ->getQuery()
             ->getResult();
     }

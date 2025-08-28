@@ -29,9 +29,9 @@ class ProgressService
         return $this->progressCreationService->createProgress($userId, $lessonId, $requestId, $action);
     }
 
-    public function isIdempotentRequest(string $requestId): bool
+    public function isIdempotentRequest(string $requestId, int $userId, int $lessonId, string $action): bool
     {
-        return $this->progressCreationService->isIdempotentRequest($requestId);
+        return $this->progressCreationService->isIdempotentRequest($requestId, $userId, $lessonId, $action);
     }
 
     /**

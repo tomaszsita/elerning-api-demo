@@ -47,7 +47,12 @@ class ProgressController
             return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
         }
 
-        $isIdempotent = $this->progressService->isIdempotentRequest($createRequest->requestId);
+        $isIdempotent = $this->progressService->isIdempotentRequest(
+            $createRequest->requestId,
+            $createRequest->userId,
+            $createRequest->lessonId,
+            $createRequest->action
+        );
 
         $progress = $this->progressService->createProgress(
             $createRequest->userId,
