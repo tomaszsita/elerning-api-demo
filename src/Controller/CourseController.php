@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Controller;
 
 use App\Service\EnrollmentService;
@@ -19,9 +21,9 @@ class CourseController
     public function listCourses(): JsonResponse
     {
         $courses = $this->enrollmentService->getAllCoursesWithRemainingSeats();
-        
-        $coursesData = array_map(fn($course) => $course->toArray(), $courses);
-        
+
+        $coursesData = array_map(fn ($course) => $course->toArray(), $courses);
+
         return new JsonResponse(['courses' => $coursesData], Response::HTTP_OK);
     }
 
@@ -29,13 +31,13 @@ class CourseController
     public function enrollInCourse(int $id, \Symfony\Component\HttpFoundation\Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        
-        if (json_last_error() !== JSON_ERROR_NONE) {
+
+        if (JSON_ERROR_NONE !== json_last_error()) {
             return new JsonResponse(['error' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
         }
 
         $userId = $data['user_id'] ?? null;
-        
+
         if (!$userId || !is_numeric($userId)) {
             return new JsonResponse(['error' => 'user_id is required and must be numeric'], Response::HTTP_BAD_REQUEST);
         }

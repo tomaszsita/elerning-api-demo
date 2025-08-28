@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Entity;
 
 use App\Repository\ProgressHistoryRepository;
@@ -56,6 +58,7 @@ class ProgressHistory implements \JsonSerializable
     public function setProgress(?Progress $progress): self
     {
         $this->progress = $progress;
+
         return $this;
     }
 
@@ -67,6 +70,7 @@ class ProgressHistory implements \JsonSerializable
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -78,6 +82,7 @@ class ProgressHistory implements \JsonSerializable
     public function setLesson(?Lesson $lesson): self
     {
         $this->lesson = $lesson;
+
         return $this;
     }
 
@@ -89,6 +94,7 @@ class ProgressHistory implements \JsonSerializable
     public function setOldStatus(?string $oldStatus): self
     {
         $this->oldStatus = $oldStatus;
+
         return $this;
     }
 
@@ -100,6 +106,7 @@ class ProgressHistory implements \JsonSerializable
     public function setNewStatus(string $newStatus): self
     {
         $this->newStatus = $newStatus;
+
         return $this;
     }
 
@@ -111,6 +118,7 @@ class ProgressHistory implements \JsonSerializable
     public function setChangedAt(\DateTimeImmutable $changedAt): self
     {
         $this->changedAt = $changedAt;
+
         return $this;
     }
 
@@ -122,6 +130,7 @@ class ProgressHistory implements \JsonSerializable
     public function setRequestId(?string $requestId): self
     {
         $this->requestId = $requestId;
+
         return $this;
     }
 
@@ -131,14 +140,14 @@ class ProgressHistory implements \JsonSerializable
     public function toArray(): array
     {
         return [
-            'id' => $this->getId(),
+            'id'          => $this->getId(),
             'progress_id' => $this->getProgress() ? $this->getProgress()->getId() : null,
-            'user_id' => $this->getUser() ? $this->getUser()->getId() : null,
-            'lesson_id' => $this->getLesson() ? $this->getLesson()->getId() : null,
-            'old_status' => $this->getOldStatus(),
-            'new_status' => $this->getNewStatus(),
-            'changed_at' => $this->getChangedAt() ? $this->getChangedAt()->format('Y-m-d H:i:s') : null,
-            'request_id' => $this->getRequestId(),
+            'user_id'     => $this->getUser() ? $this->getUser()->getId() : null,
+            'lesson_id'   => $this->getLesson() ? $this->getLesson()->getId() : null,
+            'old_status'  => $this->getOldStatus(),
+            'new_status'  => $this->getNewStatus(),
+            'changed_at'  => $this->getChangedAt() ? $this->getChangedAt()->format('Y-m-d H:i:s') : null,
+            'request_id'  => $this->getRequestId(),
         ];
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Service;
 
 use App\Entity\Progress;
@@ -23,15 +25,15 @@ class ProgressStatusService
     {
         $currentStatus = $progress->getStatus();
         $oldStatus = $currentStatus ? $currentStatus->value : null;
-        
+
         $progress->setStatus($newStatus);
-        
-        if ($newStatus === \App\Enum\ProgressStatus::COMPLETE) {
+
+        if (\App\Enum\ProgressStatus::COMPLETE === $newStatus) {
             $progress->setCompletedAt(new \DateTimeImmutable());
-        } elseif ($newStatus === \App\Enum\ProgressStatus::PENDING) {
+        } elseif (\App\Enum\ProgressStatus::PENDING === $newStatus) {
             $progress->setCompletedAt(null);
         }
-        
+
         $this->entityManager->flush();
 
         // Dispatch event for history tracking

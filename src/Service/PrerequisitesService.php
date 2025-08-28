@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Service;
 
 use App\Entity\Lesson;
@@ -28,13 +30,9 @@ class PrerequisitesService
 
         foreach ($prerequisiteLessons as $prerequisiteLesson) {
             $progress = $this->progressRepository->findByUserAndLesson($userId, $prerequisiteLesson->getId());
-            
+
             if (!$progress || !in_array($progress->getStatus(), [ProgressStatus::COMPLETE, ProgressStatus::FAILED])) {
-                throw new PrerequisitesNotMetException(
-                    $userId,
-                    $lesson->getId(),
-                    "User {$userId} must complete lesson '{$prerequisiteLesson->getTitle()}' before accessing lesson '{$lesson->getTitle()}'"
-                );
+                throw new PrerequisitesNotMetException($userId, $lesson->getId(), "User {$userId} must complete lesson '{$prerequisiteLesson->getTitle()}' before accessing lesson '{$lesson->getTitle()}'");
             }
         }
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Controller;
 
 use App\Request\CreateProgressRequest;
@@ -23,8 +25,8 @@ class ProgressController
     public function createProgress(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        
-        if (json_last_error() !== JSON_ERROR_NONE) {
+
+        if (JSON_ERROR_NONE !== json_last_error()) {
             return new JsonResponse(['error' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -41,11 +43,12 @@ class ProgressController
             foreach ($errors as $error) {
                 $errorMessages[] = $error->getMessage();
             }
+
             return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
         }
 
         $isIdempotent = $this->progressService->isIdempotentRequest($createRequest->requestId);
-        
+
         $progress = $this->progressService->createProgress(
             $createRequest->userId,
             $createRequest->lessonId,
@@ -60,7 +63,7 @@ class ProgressController
     public function getUserProgress(int $user_id, int $course_id): JsonResponse
     {
         $summary = $this->progressService->getUserProgressSummary($user_id, $course_id);
-        
+
         return new JsonResponse($summary, Response::HTTP_OK);
     }
 
@@ -68,7 +71,7 @@ class ProgressController
     public function deleteProgress(int $user_id, int $lesson_id): JsonResponse
     {
         $this->progressService->deleteProgress($user_id, $lesson_id);
-        
+
         return new JsonResponse([], Response::HTTP_NO_CONTENT);
     }
 
@@ -76,9 +79,9 @@ class ProgressController
     public function getProgressHistory(int $user_id, int $lesson_id): JsonResponse
     {
         $history = $this->progressService->getProgressHistory($user_id, $lesson_id);
-        
-        $historyData = array_map(fn($record) => $record->toArray(), $history);
-        
+
+        $historyData = array_map(fn ($record) => $record->toArray(), $history);
+
         return new JsonResponse(['history' => $historyData], Response::HTTP_OK);
     }
 }

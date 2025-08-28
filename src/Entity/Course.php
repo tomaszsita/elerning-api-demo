@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Entity;
 
 use App\Repository\CourseRepository;
@@ -63,6 +65,7 @@ class Course implements \JsonSerializable
     public function setTitle(string $title): self
     {
         $this->title = $title;
+
         return $this;
     }
 
@@ -74,6 +77,7 @@ class Course implements \JsonSerializable
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
         return $this;
     }
 
@@ -85,6 +89,7 @@ class Course implements \JsonSerializable
     public function setMaxSeats(int $maxSeats): self
     {
         $this->maxSeats = $maxSeats;
+
         return $this;
     }
 
@@ -96,6 +101,7 @@ class Course implements \JsonSerializable
     public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
+
         return $this;
     }
 
@@ -118,13 +124,13 @@ class Course implements \JsonSerializable
         }
 
         return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'description' => $this->description,
-            'max_seats' => $this->maxSeats,
+            'id'              => $this->id,
+            'title'           => $this->title,
+            'description'     => $this->description,
+            'max_seats'       => $this->maxSeats,
             'remaining_seats' => $this->getRemainingSeats(),
-            'lessons' => $lessons,
-            'created_at' => $this->createdAt ? $this->createdAt->format('Y-m-d H:i:s') : null,
+            'lessons'         => $lessons,
+            'created_at'      => $this->createdAt ? $this->createdAt->format('Y-m-d H:i:s') : null,
         ];
     }
 
@@ -142,6 +148,7 @@ class Course implements \JsonSerializable
             $this->lessons->add($lesson);
             $lesson->setCourse($this);
         }
+
         return $this;
     }
 
@@ -152,6 +159,7 @@ class Course implements \JsonSerializable
                 $lesson->setCourse(null);
             }
         }
+
         return $this;
     }
 
@@ -169,6 +177,7 @@ class Course implements \JsonSerializable
             $this->enrollments->add($enrollment);
             $enrollment->setCourse($this);
         }
+
         return $this;
     }
 
@@ -179,6 +188,7 @@ class Course implements \JsonSerializable
                 $enrollment->setCourse(null);
             }
         }
+
         return $this;
     }
 

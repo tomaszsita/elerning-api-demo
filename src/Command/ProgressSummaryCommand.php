@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Command;
 
 use App\Service\ProgressService;
@@ -29,18 +31,19 @@ class ProgressSummaryCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        
+
         $userId = (int) $input->getArgument('userId');
         $courseId = (int) $input->getArgument('courseId');
 
         try {
             $summary = $this->progressService->getUserProgressSummary($userId, $courseId);
-            
+
             $io->text(sprintf('%d/%d (%d%%)', $summary['completed'], $summary['total'], $summary['percent']));
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
             $io->error('Error: ' . $e->getMessage());
+
             return Command::FAILURE;
         }
     }

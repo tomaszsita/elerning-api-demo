@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Event;
 
 use App\Entity\Progress;
@@ -10,8 +12,11 @@ class ProgressChangedEvent extends Event
     public const NAME = 'progress.changed';
 
     private Progress $progress;
+
     private ?string $oldStatus;
+
     private string $newStatus;
+
     private ?string $requestId;
 
     public function __construct(

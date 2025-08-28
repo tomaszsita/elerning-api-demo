@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Tests\Service;
 
 use App\Entity\Course;
@@ -18,9 +20,13 @@ use PHPUnit\Framework\TestCase;
 class ProgressQueryServiceTest extends TestCase
 {
     private ProgressQueryService $progressQueryService;
+
     private ValidationService $validationService;
+
     private ProgressRepositoryInterface $progressRepository;
+
     private EntityManagerInterface $entityManager;
+
     private ProgressHistoryRepository $progressHistoryRepository;
 
     protected function setUp(): void

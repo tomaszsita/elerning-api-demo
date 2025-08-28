@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Entity;
 
 use App\Repository\ProgressRepository;
@@ -51,6 +53,7 @@ class Progress implements \JsonSerializable
     public function setCompletedAt(?\DateTimeImmutable $completedAt): self
     {
         $this->completedAt = $completedAt;
+
         return $this;
     }
 
@@ -62,6 +65,7 @@ class Progress implements \JsonSerializable
     public function setRequestId(?string $requestId): self
     {
         $this->requestId = $requestId;
+
         return $this;
     }
 
@@ -73,6 +77,7 @@ class Progress implements \JsonSerializable
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -84,6 +89,7 @@ class Progress implements \JsonSerializable
     public function setLesson(?Lesson $lesson): self
     {
         $this->lesson = $lesson;
+
         return $this;
     }
 
@@ -95,12 +101,13 @@ class Progress implements \JsonSerializable
     public function setStatus(\App\Enum\ProgressStatus $status): self
     {
         $this->status = $status;
+
         return $this;
     }
 
     public function isCompleted(): bool
     {
-        return $this->status === \App\Enum\ProgressStatus::COMPLETE;
+        return \App\Enum\ProgressStatus::COMPLETE === $this->status;
     }
 
     public function canTransitionTo(string $newStatus): bool
@@ -114,12 +121,12 @@ class Progress implements \JsonSerializable
     public function toArray(): array
     {
         return [
-            'id' => $this->getId(),
-            'user_id' => $this->getUser() ? $this->getUser()->getId() : null,
-            'lesson_id' => $this->getLesson() ? $this->getLesson()->getId() : null,
+            'id'           => $this->getId(),
+            'user_id'      => $this->getUser() ? $this->getUser()->getId() : null,
+            'lesson_id'    => $this->getLesson() ? $this->getLesson()->getId() : null,
             'lesson_title' => $this->getLesson() ? $this->getLesson()->getTitle() : null,
-            'status' => $this->getStatus() ? $this->getStatus()->value : null,
-            'request_id' => $this->getRequestId(),
+            'status'       => $this->getStatus() ? $this->getStatus()->value : null,
+            'request_id'   => $this->getRequestId(),
             'completed_at' => $this->getCompletedAt() ? $this->getCompletedAt()->format('Y-m-d H:i:s') : null,
         ];
     }

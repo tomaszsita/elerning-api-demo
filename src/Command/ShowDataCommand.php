@@ -1,10 +1,9 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Command;
 
-use App\Repository\Interfaces\CourseRepositoryInterface;
-use App\Repository\Interfaces\EnrollmentRepositoryInterface;
-use App\Repository\Interfaces\UserRepositoryInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,10 +29,10 @@ class ShowDataCommand extends Command
 
         // Show users
         $this->showUsers($io);
-        
+
         // Show courses
         $this->showCourses($io);
-        
+
         // Show enrollments
         $this->showEnrollments($io);
 
@@ -43,11 +42,12 @@ class ShowDataCommand extends Command
     private function showUsers(SymfonyStyle $io): void
     {
         $io->section('Users');
-        
+
         $users = $this->userRepository->findAll();
-        
+
         if (empty($users)) {
             $io->text('No users found.');
+
             return;
         }
 
@@ -57,7 +57,7 @@ class ShowDataCommand extends Command
                 $user->getId(),
                 $user->getName(),
                 $user->getEmail(),
-                $user->getCreatedAt()->format('Y-m-d H:i:s')
+                $user->getCreatedAt()->format('Y-m-d H:i:s'),
             ];
         }
 
@@ -67,11 +67,12 @@ class ShowDataCommand extends Command
     private function showCourses(SymfonyStyle $io): void
     {
         $io->section('Courses');
-        
+
         $courses = $this->courseRepository->findAll();
-        
+
         if (empty($courses)) {
             $io->text('No courses found.');
+
             return;
         }
 
@@ -79,14 +80,14 @@ class ShowDataCommand extends Command
         foreach ($courses as $course) {
             $enrollmentCount = $this->courseRepository->countEnrollmentsByCourse($course->getId());
             $remainingSeats = $course->getMaxSeats() - $enrollmentCount;
-            
+
             $table[] = [
                 $course->getId(),
                 $course->getTitle(),
                 $course->getMaxSeats(),
                 $enrollmentCount,
                 $remainingSeats,
-                $course->getCreatedAt()->format('Y-m-d H:i:s')
+                $course->getCreatedAt()->format('Y-m-d H:i:s'),
             ];
         }
 
@@ -96,11 +97,12 @@ class ShowDataCommand extends Command
     private function showEnrollments(SymfonyStyle $io): void
     {
         $io->section('Enrollments');
-        
+
         $enrollments = $this->enrollmentRepository->findAll();
-        
+
         if (empty($enrollments)) {
             $io->text('No enrollments found.');
+
             return;
         }
 
@@ -112,7 +114,7 @@ class ShowDataCommand extends Command
                 $enrollment->getCourse()->getTitle(),
                 $enrollment->getStatus(),
                 $enrollment->getEnrolledAt()->format('Y-m-d H:i:s'),
-                $enrollment->getCompletedAt() ? $enrollment->getCompletedAt()->format('Y-m-d H:i:s') : 'Not completed'
+                $enrollment->getCompletedAt() ? $enrollment->getCompletedAt()->format('Y-m-d H:i:s') : 'Not completed',
             ];
         }
 

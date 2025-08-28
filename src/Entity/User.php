@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Entity;
 
 use App\Repository\UserRepository;
@@ -58,6 +60,7 @@ class User
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
         return $this;
     }
 
@@ -69,6 +72,7 @@ class User
     public function setName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -80,6 +84,7 @@ class User
     public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
+
         return $this;
     }
 
@@ -97,6 +102,7 @@ class User
             $this->enrollments->add($enrollment);
             $enrollment->setUser($this);
         }
+
         return $this;
     }
 
@@ -107,6 +113,7 @@ class User
                 $enrollment->setUser(null);
             }
         }
+
         return $this;
     }
 
@@ -124,6 +131,7 @@ class User
             $this->progresses->add($progress);
             $progress->setUser($this);
         }
+
         return $this;
     }
 
@@ -134,6 +142,7 @@ class User
                 $progress->setUser(null);
             }
         }
+
         return $this;
     }
 }

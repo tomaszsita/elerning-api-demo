@@ -1,32 +1,37 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Tests\Service;
 
-use App\Entity\Course;
-use App\Entity\Enrollment;
 use App\Entity\Lesson;
 use App\Entity\Progress;
 use App\Entity\User;
 use App\Enum\ProgressStatus;
-use App\Exception\EntityNotFoundException;
 use App\Exception\EnrollmentException;
+use App\Exception\EntityNotFoundException;
 use App\Exception\PrerequisitesNotMetException;
 use App\Exception\ProgressException;
+use App\Factory\ProgressFactory;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
+use App\Service\PrerequisitesService;
 use App\Service\ProgressCreationService;
 use App\Service\ValidationService;
-use App\Service\PrerequisitesService;
-use App\Factory\ProgressFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 
 class ProgressCreationServiceTest extends TestCase
 {
     private ProgressCreationService $progressCreationService;
+
     private ValidationService $validationService;
+
     private PrerequisitesService $prerequisitesService;
+
     private ProgressFactory $progressFactory;
+
     private ProgressRepositoryInterface $progressRepository;
+
     private EntityManagerInterface $entityManager;
 
     protected function setUp(): void

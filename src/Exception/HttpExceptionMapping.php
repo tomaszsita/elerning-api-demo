@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Exception;
 
 class HttpExceptionMapping
@@ -13,8 +15,8 @@ class HttpExceptionMapping
 
         // 409 Conflict - Business rule violations
         PrerequisitesNotMetException::class => 409,
-        EnrollmentException::class => 409,
-        ProgressException::class => 409,
+        EnrollmentException::class          => 409,
+        ProgressException::class            => 409,
     ];
 
     public static function getStatusCode(\Throwable $exception): int

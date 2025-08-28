@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Factory;
 
-use App\Entity\User;
 use App\Entity\Course;
 use App\Entity\Lesson;
+use App\Entity\User;
 
 class TestDataFactory
 {
@@ -13,6 +15,7 @@ class TestDataFactory
         $user = new User();
         $user->setName($name);
         $user->setEmail($email);
+
         return $user;
     }
 
@@ -22,6 +25,7 @@ class TestDataFactory
         $course->setTitle($title);
         $course->setDescription($description);
         $course->setMaxSeats($maxSeats);
+
         return $course;
     }
 
@@ -32,6 +36,7 @@ class TestDataFactory
         $lesson->setContent($content);
         $lesson->setOrderIndex($orderIndex);
         $lesson->setCourse($course);
+
         return $lesson;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\EventListener;
 
 use App\Exception\HttpExceptionMapping;
@@ -12,7 +14,7 @@ class ExceptionListener
     public function onKernelException(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
-        
+
         // If it's already an HttpException, don't change it
         if ($exception instanceof HttpExceptionInterface) {
             return;
@@ -23,8 +25,8 @@ class ExceptionListener
         $message = HttpExceptionMapping::getErrorMessage($exception);
 
         $response = new JsonResponse([
-            'error' => $message,
-            'status' => $statusCode
+            'error'  => $message,
+            'status' => $statusCode,
         ], $statusCode);
 
         $event->setResponse($response);

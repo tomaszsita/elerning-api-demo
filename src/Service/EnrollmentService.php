@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Service;
 
+use App\Entity\Course;
 use App\Entity\Enrollment;
 use App\Entity\User;
-use App\Entity\Course;
 use App\Exception\EnrollmentException;
 use App\Exception\EntityNotFoundException;
+use App\Factory\EnrollmentFactory;
 use App\Repository\Interfaces\CourseRepositoryInterface;
 use App\Repository\Interfaces\EnrollmentRepositoryInterface;
-use App\Factory\EnrollmentFactory;
 use Doctrine\ORM\EntityManagerInterface;
+
 class EnrollmentService
 {
     public function __construct(
@@ -39,9 +42,10 @@ class EnrollmentService
 
         // Use pessimistic locking for concurrent enrollment safety
         $this->entityManager->beginTransaction();
+
         try {
             $course = $this->entityManager->find(Course::class, $courseId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE);
-            
+
             $enrollmentCount = $this->courseRepository->countEnrollmentsByCourse($courseId);
             if ($enrollmentCount >= $course->getMaxSeats()) {
                 throw new EnrollmentException(EnrollmentException::COURSE_FULL, $userId, $courseId);
@@ -55,6 +59,7 @@ class EnrollmentService
             return $enrollment;
         } catch (\Exception $e) {
             $this->entityManager->rollback();
+
             throw $e;
         }
     }

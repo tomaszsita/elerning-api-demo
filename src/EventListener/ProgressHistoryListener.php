@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\EventListener;
 
-use App\Entity\ProgressHistory;
 use App\Event\ProgressChangedEvent;
 use App\Factory\ProgressHistoryFactory;
 use Doctrine\ORM\EntityManagerInterface;

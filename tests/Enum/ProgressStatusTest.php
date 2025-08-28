@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Tests\Enum;
 
 use App\Enum\ProgressStatus;
@@ -18,9 +20,9 @@ class ProgressStatusTest extends TestCase
     {
         return [
             'PENDING to COMPLETE' => [ProgressStatus::PENDING, ProgressStatus::COMPLETE],
-            'PENDING to FAILED' => [ProgressStatus::PENDING, ProgressStatus::FAILED],
-            'FAILED to COMPLETE' => [ProgressStatus::FAILED, ProgressStatus::COMPLETE],
-            'FAILED to PENDING' => [ProgressStatus::FAILED, ProgressStatus::PENDING],
+            'PENDING to FAILED'   => [ProgressStatus::PENDING, ProgressStatus::FAILED],
+            'FAILED to COMPLETE'  => [ProgressStatus::FAILED, ProgressStatus::COMPLETE],
+            'FAILED to PENDING'   => [ProgressStatus::FAILED, ProgressStatus::PENDING],
             'COMPLETE to PENDING' => [ProgressStatus::COMPLETE, ProgressStatus::PENDING],
         ];
     }
@@ -50,15 +52,15 @@ class ProgressStatusTest extends TestCase
         return [
             'PENDING allowed transitions' => [
                 ProgressStatus::PENDING,
-                [ProgressStatus::COMPLETE, ProgressStatus::FAILED]
+                [ProgressStatus::COMPLETE, ProgressStatus::FAILED],
             ],
             'FAILED allowed transitions' => [
                 ProgressStatus::FAILED,
-                [ProgressStatus::COMPLETE, ProgressStatus::PENDING]
+                [ProgressStatus::COMPLETE, ProgressStatus::PENDING],
             ],
             'COMPLETE allowed transitions' => [
                 ProgressStatus::COMPLETE,
-                [ProgressStatus::PENDING]
+                [ProgressStatus::PENDING],
             ],
         ];
     }
@@ -72,9 +74,9 @@ class ProgressStatusTest extends TestCase
     public static function isFinalProvider(): array
     {
         return [
-            'COMPLETE is final' => [ProgressStatus::COMPLETE, true],
+            'COMPLETE is final'    => [ProgressStatus::COMPLETE, true],
             'PENDING is not final' => [ProgressStatus::PENDING, false],
-            'FAILED is not final' => [ProgressStatus::FAILED, false],
+            'FAILED is not final'  => [ProgressStatus::FAILED, false],
         ];
     }
 
@@ -87,9 +89,9 @@ class ProgressStatusTest extends TestCase
     public static function fromStringProvider(): array
     {
         return [
-            'pending string' => ['pending', ProgressStatus::PENDING],
+            'pending string'  => ['pending', ProgressStatus::PENDING],
             'complete string' => ['complete', ProgressStatus::COMPLETE],
-            'failed string' => ['failed', ProgressStatus::FAILED],
+            'failed string'   => ['failed', ProgressStatus::FAILED],
         ];
     }
 

@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Repository;
 
 use App\Entity\Enrollment;
 use App\Repository\Interfaces\EnrollmentRepositoryInterface;
-
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -13,8 +14,8 @@ use Doctrine\Persistence\ManagerRegistry;
  *
  * @method Enrollment|null find(int|string $id, \Doctrine\DBAL\LockMode|int|null $lockMode = null, int|null $lockVersion = null)
  * @method Enrollment|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)
- * @method Enrollment[] findAll()
- * @method Enrollment[] findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, int|null $limit = null, int|null $offset = null)
+ * @method Enrollment[]    findAll()
+ * @method Enrollment[]    findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, int|null $limit = null, int|null $offset = null)
  */
 class EnrollmentRepository extends ServiceEntityRepository implements EnrollmentRepositoryInterface
 {

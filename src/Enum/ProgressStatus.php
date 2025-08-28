@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Enum;
 
 enum ProgressStatus: string
@@ -11,9 +13,9 @@ enum ProgressStatus: string
     public static function canTransition(self $fromStatus, self $toStatus): bool
     {
         return match ($fromStatus) {
-            self::PENDING => in_array($toStatus, [self::COMPLETE, self::FAILED]),
-            self::FAILED => in_array($toStatus, [self::COMPLETE, self::PENDING]), // Can retry or reset
-            self::COMPLETE => $toStatus === self::PENDING, // Can reset to pending
+            self::PENDING  => in_array($toStatus, [self::COMPLETE, self::FAILED]),
+            self::FAILED   => in_array($toStatus, [self::COMPLETE, self::PENDING]), // Can retry or reset
+            self::COMPLETE => self::PENDING === $toStatus, // Can reset to pending
         };
     }
 
@@ -23,24 +25,24 @@ enum ProgressStatus: string
     public static function getAllowedTransitions(self $status): array
     {
         return match ($status) {
-            self::PENDING => [self::COMPLETE, self::FAILED],
-            self::FAILED => [self::COMPLETE, self::PENDING], // Can retry or reset
+            self::PENDING  => [self::COMPLETE, self::FAILED],
+            self::FAILED   => [self::COMPLETE, self::PENDING], // Can retry or reset
             self::COMPLETE => [self::PENDING], // Can reset to pending
         };
     }
 
     public static function isFinal(self $status): bool
     {
-        return $status === self::COMPLETE;
+        return self::COMPLETE === $status;
     }
 
     public static function fromString(string $value): self
     {
         return match ($value) {
-            'pending' => self::PENDING,
+            'pending'  => self::PENDING,
             'complete' => self::COMPLETE,
-            'failed' => self::FAILED,
-            default => throw new \InvalidArgumentException("Invalid status: {$value}"),
+            'failed'   => self::FAILED,
+            default    => throw new \InvalidArgumentException("Invalid status: {$value}"),
         };
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Repository;
 
 use App\Entity\ProgressHistory;
@@ -11,8 +13,8 @@ use Doctrine\Persistence\ManagerRegistry;
  *
  * @method ProgressHistory|null find(int|string $id, \Doctrine\DBAL\LockMode|int|null $lockMode = null, int|null $lockVersion = null)
  * @method ProgressHistory|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)
- * @method ProgressHistory[] findAll()
- * @method ProgressHistory[] findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, int|null $limit = null, int|null $offset = null)
+ * @method ProgressHistory[]    findAll()
+ * @method ProgressHistory[]    findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, int|null $limit = null, int|null $offset = null)
  */
 class ProgressHistoryRepository extends ServiceEntityRepository
 {

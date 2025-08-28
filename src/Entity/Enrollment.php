@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Entity;
 
 use App\Repository\EnrollmentRepository;
@@ -53,6 +55,7 @@ class Enrollment implements \JsonSerializable
     public function setEnrolledAt(\DateTimeImmutable $enrolledAt): self
     {
         $this->enrolledAt = $enrolledAt;
+
         return $this;
     }
 
@@ -64,6 +67,7 @@ class Enrollment implements \JsonSerializable
     public function setCompletedAt(?\DateTimeImmutable $completedAt): self
     {
         $this->completedAt = $completedAt;
+
         return $this;
     }
 
@@ -75,6 +79,7 @@ class Enrollment implements \JsonSerializable
     public function setStatus(string $status): self
     {
         $this->status = $status;
+
         return $this;
     }
 
@@ -86,6 +91,7 @@ class Enrollment implements \JsonSerializable
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -97,6 +103,7 @@ class Enrollment implements \JsonSerializable
     public function setCourse(?Course $course): self
     {
         $this->course = $course;
+
         return $this;
     }
 
@@ -106,12 +113,12 @@ class Enrollment implements \JsonSerializable
     public function toArray(): array
     {
         return [
-            'id' => $this->getId(),
-            'user_id' => $this->getUser() ? $this->getUser()->getId() : null,
-            'course_id' => $this->getCourse() ? $this->getCourse()->getId() : null,
+            'id'           => $this->getId(),
+            'user_id'      => $this->getUser() ? $this->getUser()->getId() : null,
+            'course_id'    => $this->getCourse() ? $this->getCourse()->getId() : null,
             'course_title' => $this->getCourse() ? $this->getCourse()->getTitle() : null,
-            'status' => $this->getStatus(),
-            'enrolled_at' => $this->getEnrolledAt() ? $this->getEnrolledAt()->format('Y-m-d H:i:s') : null,
+            'status'       => $this->getStatus(),
+            'enrolled_at'  => $this->getEnrolledAt() ? $this->getEnrolledAt()->format('Y-m-d H:i:s') : null,
             'completed_at' => $this->getCompletedAt() ? $this->getCompletedAt()->format('Y-m-d H:i:s') : null,
         ];
     }

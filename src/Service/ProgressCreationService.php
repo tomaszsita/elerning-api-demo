@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Service;
 
 use App\Entity\Progress;
 use App\Exception\ProgressException;
 use App\Factory\ProgressFactory;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
-use App\Service\PrerequisitesService;
-use App\Service\ValidationService;
 use Doctrine\ORM\EntityManagerInterface;
 
 class ProgressCreationService
@@ -41,17 +41,12 @@ class ProgressCreationService
     private function handleExistingRequestId(Progress $existingProgress, int $userId, int $lessonId, string $requestId): Progress
     {
         // If request_id exists, check if it matches the same user/lesson
-        if ($existingProgress->getUser()->getId() === $userId && 
-            $existingProgress->getLesson()->getId() === $lessonId) {
+        if ($existingProgress->getUser()->getId() === $userId
+            && $existingProgress->getLesson()->getId() === $lessonId) {
             return $existingProgress; // Idempotency - return existing result
         } else {
             // Request_id exists but with different user/lesson - conflict
-            throw new ProgressException(
-                ProgressException::REQUEST_ID_CONFLICT,
-                $requestId,
-                $userId,
-                $lessonId
-            );
+            throw new ProgressException(ProgressException::REQUEST_ID_CONFLICT, $requestId, $userId, $lessonId);
         }
     }
 
@@ -61,16 +56,16 @@ class ProgressCreationService
         if ($existingProgress->getStatus() !== $newStatus) {
             $existingProgress->setStatus($newStatus);
             $existingProgress->setRequestId($requestId);
-            
-            if ($newStatus === \App\Enum\ProgressStatus::COMPLETE) {
+
+            if (\App\Enum\ProgressStatus::COMPLETE === $newStatus) {
                 $existingProgress->setCompletedAt(new \DateTimeImmutable());
-            } elseif ($newStatus === \App\Enum\ProgressStatus::PENDING) {
+            } elseif (\App\Enum\ProgressStatus::PENDING === $newStatus) {
                 $existingProgress->setCompletedAt(null);
             }
-            
+
             $this->entityManager->flush();
         }
-        
+
         return $existingProgress;
     }
 
@@ -96,6 +91,6 @@ class ProgressCreationService
 
     public function isIdempotentRequest(string $requestId): bool
     {
-        return $this->progressRepository->findByRequestId($requestId) !== null;
+        return null !== $this->progressRepository->findByRequestId($requestId);
     }
 }

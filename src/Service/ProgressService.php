@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Service;
 
 use App\Entity\Progress;
@@ -17,7 +19,9 @@ class ProgressService
     }
 
     private ProgressCreationService $progressCreationService;
+
     private ProgressStatusService $progressStatusService;
+
     private ProgressQueryService $progressQueryService;
 
     public function createProgress(int $userId, int $lessonId, string $requestId, string $action = 'complete'): Progress

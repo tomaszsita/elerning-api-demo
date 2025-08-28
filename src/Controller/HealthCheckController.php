@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,9 +14,9 @@ class HealthCheckController
     public function health(): JsonResponse
     {
         return new JsonResponse([
-            'status' => 'ok',
+            'status'    => 'ok',
             'timestamp' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
-            'version' => '1.0.0'
+            'version'   => '1.0.0',
         ], Response::HTTP_OK);
     }
 }

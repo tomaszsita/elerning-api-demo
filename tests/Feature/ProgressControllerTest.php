@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Tests\Feature;
 
 use App\Entity\Course;
@@ -27,13 +29,13 @@ class ProgressControllerTest extends AbstractFeature
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => $user->getId(),
-            'lesson_id' => $lesson->getId(),
+            'user_id'    => $user->getId(),
+            'lesson_id'  => $lesson->getId(),
             'request_id' => 'test-request-123',
         ]));
 
         $this->assertResponseStatusCodeSame(201);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('id', $responseData);
         $this->assertEquals($user->getId(), $responseData['user_id']);
@@ -60,8 +62,8 @@ class ProgressControllerTest extends AbstractFeature
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => $user->getId(),
-            'lesson_id' => $lesson->getId(),
+            'user_id'    => $user->getId(),
+            'lesson_id'  => $lesson->getId(),
             'request_id' => $requestId,
         ]));
 
@@ -71,8 +73,8 @@ class ProgressControllerTest extends AbstractFeature
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => $user->getId(),
-            'lesson_id' => $lesson->getId(),
+            'user_id'    => $user->getId(),
+            'lesson_id'  => $lesson->getId(),
             'request_id' => $requestId,
         ]));
 
@@ -109,8 +111,8 @@ class ProgressControllerTest extends AbstractFeature
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => $user1->getId(),
-            'lesson_id' => $lesson1->getId(),
+            'user_id'    => $user1->getId(),
+            'lesson_id'  => $lesson1->getId(),
             'request_id' => $requestId,
         ]));
 
@@ -120,13 +122,13 @@ class ProgressControllerTest extends AbstractFeature
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => $user2->getId(),
-            'lesson_id' => $lesson2->getId(),
+            'user_id'    => $user2->getId(),
+            'lesson_id'  => $lesson2->getId(),
             'request_id' => $requestId,
         ]));
 
         $this->assertResponseStatusCodeSame(409);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('error', $responseData);
         $this->assertStringContainsString('already exists with different user/lesson combination', $responseData['error']);
@@ -139,7 +141,7 @@ class ProgressControllerTest extends AbstractFeature
         ], 'invalid json');
 
         $this->assertResponseStatusCodeSame(400);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('error', $responseData);
         $this->assertEquals('Invalid JSON', $responseData['error']);
@@ -164,14 +166,14 @@ class ProgressControllerTest extends AbstractFeature
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => $user->getId(),
-            'lesson_id' => $lesson->getId(),
-            'action' => $action,
+            'user_id'    => $user->getId(),
+            'lesson_id'  => $lesson->getId(),
+            'action'     => $action,
             'request_id' => 'test-request-' . $action,
         ]));
 
         $this->assertResponseStatusCodeSame(201);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('id', $responseData);
         $this->assertEquals($user->getId(), $responseData['user_id']);
@@ -186,8 +188,8 @@ class ProgressControllerTest extends AbstractFeature
     {
         return [
             'complete action' => ['complete', 'complete'],
-            'failed action' => ['failed', 'failed'],
-            'pending action' => ['pending', 'pending'],
+            'failed action'   => ['failed', 'failed'],
+            'pending action'  => ['pending', 'pending'],
         ];
     }
 
@@ -199,7 +201,7 @@ class ProgressControllerTest extends AbstractFeature
         ], json_encode($invalidData));
 
         $this->assertResponseStatusCodeSame(400);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('errors', $responseData);
         $this->assertNotEmpty($responseData['errors']);
@@ -210,24 +212,24 @@ class ProgressControllerTest extends AbstractFeature
         return [
             'invalid user_id and lesson_id' => [
                 [
-                    'user_id' => 0,
-                    'lesson_id' => -1,
+                    'user_id'    => 0,
+                    'lesson_id'  => -1,
                     'request_id' => '',
-                ]
+                ],
             ],
             'missing required fields' => [
                 [
-                    'user_id' => null,
-                    'lesson_id' => null,
+                    'user_id'    => null,
+                    'lesson_id'  => null,
                     'request_id' => null,
-                ]
+                ],
             ],
             'negative values' => [
                 [
-                    'user_id' => -5,
-                    'lesson_id' => -10,
+                    'user_id'    => -5,
+                    'lesson_id'  => -10,
                     'request_id' => 'test',
-                ]
+                ],
             ],
         ];
     }
@@ -235,18 +237,18 @@ class ProgressControllerTest extends AbstractFeature
     #[DataProvider('notFoundProvider')]
     public function testCreateProgressNotFound(string $entityType, int $invalidId, string $expectedError): void
     {
-        if ($entityType === 'user') {
+        if ('user' === $entityType) {
             $lesson = $this->getTestLesson();
             $requestData = [
-                'user_id' => $invalidId,
-                'lesson_id' => $lesson->getId(),
+                'user_id'    => $invalidId,
+                'lesson_id'  => $lesson->getId(),
                 'request_id' => 'test-request-123',
             ];
         } else {
             $user = $this->getTestUser();
             $requestData = [
-                'user_id' => $user->getId(),
-                'lesson_id' => $invalidId,
+                'user_id'    => $user->getId(),
+                'lesson_id'  => $invalidId,
                 'request_id' => 'test-request-123',
             ];
         }
@@ -256,7 +258,7 @@ class ProgressControllerTest extends AbstractFeature
         ], json_encode($requestData));
 
         $this->assertResponseStatusCodeSame(404);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('error', $responseData);
         $this->assertStringContainsString($expectedError, $responseData['error']);
@@ -265,7 +267,7 @@ class ProgressControllerTest extends AbstractFeature
     public static function notFoundProvider(): array
     {
         return [
-            'user not found' => ['user', 99999, 'User 99999 not found'],
+            'user not found'   => ['user', 99999, 'User 99999 not found'],
             'lesson not found' => ['lesson', 99999, 'Lesson 99999 not found'],
         ];
     }
@@ -285,22 +287,21 @@ class ProgressControllerTest extends AbstractFeature
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => $user->getId(),
-            'lesson_id' => $lesson->getId(),
+            'user_id'    => $user->getId(),
+            'lesson_id'  => $lesson->getId(),
             'request_id' => 'test-request-456',
         ]));
-
 
         $this->client->request('GET', '/progress/' . $user->getId() . '/courses/' . $course->getId());
 
         $this->assertResponseStatusCodeSame(200);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('completed', $responseData);
         $this->assertArrayHasKey('total', $responseData);
         $this->assertArrayHasKey('percent', $responseData);
         $this->assertArrayHasKey('lessons', $responseData);
-        
+
         $this->assertEquals(1, $responseData['completed']);
         $this->assertEquals(1, $responseData['total']);
         $this->assertEquals(100, $responseData['percent']);
@@ -326,8 +327,8 @@ class ProgressControllerTest extends AbstractFeature
         $this->client->request('POST', '/progress', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'user_id' => $user->getId(),
-            'lesson_id' => $lesson->getId(),
+            'user_id'    => $user->getId(),
+            'lesson_id'  => $lesson->getId(),
             'request_id' => 'test-delete-123',
         ]));
 
@@ -378,12 +379,10 @@ class ProgressControllerTest extends AbstractFeature
 
         // Create progress with failed status (would need to be implemented in ProgressService)
         // For now, we'll test that the endpoint works for any existing progress
-        
+
         // Try to delete progress (should work even if no progress exists)
         $this->client->request('DELETE', '/progress/' . $user->getId() . '/lessons/' . $lesson->getId());
 
         $this->assertResponseStatusCodeSame(204);
     }
-
-
 }

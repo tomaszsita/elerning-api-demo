@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Entity;
 
 use App\Repository\LessonRepository;
@@ -41,8 +43,6 @@ class Lesson
     /** @var Collection<int, Progress> */
     private Collection $progresses;
 
-
-
     public function __construct()
     {
         $this->progresses = new ArrayCollection();
@@ -62,6 +62,7 @@ class Lesson
     public function setTitle(string $title): self
     {
         $this->title = $title;
+
         return $this;
     }
 
@@ -73,6 +74,7 @@ class Lesson
     public function setContent(?string $content): self
     {
         $this->content = $content;
+
         return $this;
     }
 
@@ -84,6 +86,7 @@ class Lesson
     public function setOrderIndex(int $orderIndex): self
     {
         $this->orderIndex = $orderIndex;
+
         return $this;
     }
 
@@ -95,6 +98,7 @@ class Lesson
     public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
+
         return $this;
     }
 
@@ -106,6 +110,7 @@ class Lesson
     public function setCourse(?Course $course): self
     {
         $this->course = $course;
+
         return $this;
     }
 
@@ -123,6 +128,7 @@ class Lesson
             $this->progresses->add($progress);
             $progress->setLesson($this);
         }
+
         return $this;
     }
 
@@ -133,6 +139,7 @@ class Lesson
                 $progress->setLesson(null);
             }
         }
+
         return $this;
     }
 
@@ -142,11 +149,11 @@ class Lesson
     public function toArray(): array
     {
         return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'content' => $this->content,
+            'id'          => $this->id,
+            'title'       => $this->title,
+            'content'     => $this->content,
             'order_index' => $this->orderIndex,
-            'created_at' => $this->createdAt ? $this->createdAt->format('Y-m-d H:i:s') : null,
+            'created_at'  => $this->createdAt ? $this->createdAt->format('Y-m-d H:i:s') : null,
         ];
     }
 }

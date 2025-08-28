@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Tests\Feature;
 
 use App\Entity\Course;
@@ -25,11 +27,11 @@ class UserControllerTest extends AbstractFeature
         $this->client->request('GET', '/users/' . $user->getId() . '/courses');
 
         $this->assertResponseStatusCodeSame(200);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('courses', $responseData);
         $this->assertNotEmpty($responseData['courses']);
-        
+
         $courseData = $responseData['courses'][0];
         $this->assertArrayHasKey('id', $courseData);
         $this->assertArrayHasKey('title', $courseData);
@@ -43,7 +45,7 @@ class UserControllerTest extends AbstractFeature
         $this->client->request('GET', '/users/99999/courses');
 
         $this->assertResponseStatusCodeSame(404);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('error', $responseData);
         $this->assertStringContainsString('User 99999 not found', $responseData['error']);
@@ -56,7 +58,7 @@ class UserControllerTest extends AbstractFeature
         $this->client->request('GET', '/users/' . $user->getId() . '/courses');
 
         $this->assertResponseStatusCodeSame(200);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('courses', $responseData);
         $this->assertEmpty($responseData['courses']);

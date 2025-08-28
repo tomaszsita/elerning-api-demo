@@ -1,23 +1,29 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Tests\Service;
 
 use App\Entity\Progress;
+use App\Enum\ProgressStatus;
 use App\Event\ProgressChangedEvent;
 use App\Factory\ProgressChangedEventFactory;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
 use App\Service\ProgressStatusService;
-use App\Enum\ProgressStatus;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ProgressStatusServiceTest extends TestCase
 {
     private ProgressStatusService $progressStatusService;
+
     private ProgressRepositoryInterface $progressRepository;
+
     private EntityManagerInterface $entityManager;
+
     private EventDispatcherInterface $eventDispatcher;
+
     private ProgressChangedEventFactory $progressChangedEventFactory;
 
     protected function setUp(): void

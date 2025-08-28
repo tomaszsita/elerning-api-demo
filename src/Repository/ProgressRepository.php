@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Repository;
 
 use App\Entity\Progress;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
-
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -13,8 +14,8 @@ use Doctrine\Persistence\ManagerRegistry;
  *
  * @method Progress|null find(int|string $id, \Doctrine\DBAL\LockMode|int|null $lockMode = null, int|null $lockVersion = null)
  * @method Progress|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)
- * @method Progress[] findAll()
- * @method Progress[] findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, int|null $limit = null, int|null $offset = null)
+ * @method Progress[]    findAll()
+ * @method Progress[]    findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, int|null $limit = null, int|null $offset = null)
  */
 class ProgressRepository extends ServiceEntityRepository implements ProgressRepositoryInterface
 {
@@ -54,8 +55,8 @@ class ProgressRepository extends ServiceEntityRepository implements ProgressRepo
     public function findByUserAndLesson(int $userId, int $lessonId): ?Progress
     {
         return $this->findOneBy([
-            'user' => $userId,
-            'lesson' => $lessonId
+            'user'   => $userId,
+            'lesson' => $lessonId,
         ]);
     }
 }

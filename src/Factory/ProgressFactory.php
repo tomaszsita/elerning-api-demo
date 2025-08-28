@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Factory;
 
+use App\Entity\Lesson;
 use App\Entity\Progress;
 use App\Entity\User;
-use App\Entity\Lesson;
 use App\Enum\ProgressStatus;
 
 class ProgressFactory
@@ -21,7 +23,7 @@ class ProgressFactory
         $progress->setRequestId($requestId);
         $progress->setStatus($status);
 
-        if ($status === ProgressStatus::COMPLETE) {
+        if (ProgressStatus::COMPLETE === $status) {
             $progress->setCompletedAt(new \DateTimeImmutable());
         }
 

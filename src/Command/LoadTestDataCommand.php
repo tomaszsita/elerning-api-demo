@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Command;
 
 use App\Entity\Course;
-use App\Entity\Lesson;
 use App\Entity\User;
 use App\Factory\TestDataFactory;
 use Doctrine\ORM\EntityManagerInterface;
@@ -41,12 +42,13 @@ class LoadTestDataCommand extends Command
             $io->success([
                 'Test data loaded successfully!',
                 sprintf('Created %d users', count($users)),
-                sprintf('Created %d courses with lessons', count($courses))
+                sprintf('Created %d courses with lessons', count($courses)),
             ]);
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
             $io->error('Failed to load test data: ' . $e->getMessage());
+
             return Command::FAILURE;
         }
     }
@@ -88,36 +90,36 @@ class LoadTestDataCommand extends Command
         $courses = [];
         $courseData = [
             [
-                'title' => 'PHP Fundamentals',
+                'title'       => 'PHP Fundamentals',
                 'description' => 'Learn the basics of PHP programming',
-                'maxSeats' => 5,
-                'lessons' => [
+                'maxSeats'    => 5,
+                'lessons'     => [
                     ['title' => 'Introduction to PHP', 'content' => 'PHP is a server-side scripting language...'],
                     ['title' => 'Variables and Data Types', 'content' => 'PHP supports various data types...'],
                     ['title' => 'Control Structures', 'content' => 'Learn about if, else, loops...'],
-                ]
+                ],
             ],
             [
-                'title' => 'Symfony Framework',
+                'title'       => 'Symfony Framework',
                 'description' => 'Master the Symfony PHP framework',
-                'maxSeats' => 10,
-                'lessons' => [
+                'maxSeats'    => 10,
+                'lessons'     => [
                     ['title' => 'Symfony Overview', 'content' => 'Symfony is a PHP framework...'],
                     ['title' => 'Routing and Controllers', 'content' => 'Learn about routing...'],
                     ['title' => 'Doctrine ORM', 'content' => 'Database management with Doctrine...'],
                     ['title' => 'Forms and Validation', 'content' => 'Handle forms and validation...'],
-                ]
+                ],
             ],
             [
-                'title' => 'Database Design',
+                'title'       => 'Database Design',
                 'description' => 'Learn database design principles',
-                'maxSeats' => 15,
-                'lessons' => [
+                'maxSeats'    => 15,
+                'lessons'     => [
                     ['title' => 'Database Fundamentals', 'content' => 'Understanding databases...'],
                     ['title' => 'Normalization', 'content' => 'Database normalization rules...'],
                     ['title' => 'SQL Basics', 'content' => 'Structured Query Language...'],
-                ]
-            ]
+                ],
+            ],
         ];
 
         foreach ($courseData as $data) {

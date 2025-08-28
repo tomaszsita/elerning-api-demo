@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Tests\Feature;
 
 use App\Entity\Course;
@@ -11,13 +13,16 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @coversNothing
+ *
  * @group base
  * @group abstract
  */
 abstract class AbstractFeature extends WebTestCase
 {
     protected EntityManagerInterface $entityManager;
+
     protected ContainerInterface $container;
+
     protected $client;
 
     protected function setUp(): void
@@ -25,7 +30,7 @@ abstract class AbstractFeature extends WebTestCase
         $this->client = static::createClient();
         $this->container = static::getContainer();
         $this->entityManager = $this->container->get(EntityManagerInterface::class);
-        
+
         $this->cleanupDatabase();
         $this->loadTestData();
     }
@@ -71,6 +76,7 @@ abstract class AbstractFeature extends WebTestCase
     protected function getTestLesson(): Lesson
     {
         $lesson = $this->entityManager->getRepository(Lesson::class)->findOneBy(['title' => 'Test Lesson']);
+
         return $lesson;
     }
 
@@ -81,7 +87,7 @@ abstract class AbstractFeature extends WebTestCase
         $user->setEmail($email);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
-        
+
         return $user;
     }
 
@@ -93,7 +99,7 @@ abstract class AbstractFeature extends WebTestCase
         $course->setMaxSeats($maxSeats);
         $this->entityManager->persist($course);
         $this->entityManager->flush();
-        
+
         return $course;
     }
 
@@ -106,7 +112,7 @@ abstract class AbstractFeature extends WebTestCase
         $lesson->setCourse($course);
         $this->entityManager->persist($lesson);
         $this->entityManager->flush();
-        
+
         return $lesson;
     }
 
@@ -117,7 +123,7 @@ abstract class AbstractFeature extends WebTestCase
         $this->entityManager->createQuery('DELETE FROM App\Entity\Lesson')->execute();
         $this->entityManager->createQuery('DELETE FROM App\Entity\Course')->execute();
         $this->entityManager->createQuery('DELETE FROM App\Entity\User')->execute();
-        
+
         $this->entityManager->flush();
     }
 }

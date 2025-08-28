@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Repository;
 
 use App\Entity\Course;
 use App\Repository\Interfaces\CourseRepositoryInterface;
-
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -13,8 +14,8 @@ use Doctrine\Persistence\ManagerRegistry;
  *
  * @method Course|null find(int|string $id, \Doctrine\DBAL\LockMode|int|null $lockMode = null, int|null $lockVersion = null)
  * @method Course|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)
- * @method Course[] findAll()
- * @method Course[] findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, int|null $limit = null, int|null $offset = null)
+ * @method Course[]    findAll()
+ * @method Course[]    findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, int|null $limit = null, int|null $offset = null)
  */
 class CourseRepository extends ServiceEntityRepository implements CourseRepositoryInterface
 {
@@ -32,7 +33,7 @@ class CourseRepository extends ServiceEntityRepository implements CourseReposito
             ->setParameter('courseId', $courseId)
             ->getQuery()
             ->getSingleScalarResult();
-        
+
         return (int) $result;
     }
 

@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Service;
 
 use App\Entity\Course;
-use App\Entity\User;
 use App\Entity\Lesson;
+use App\Entity\User;
 use App\Enum\ProgressStatus;
-use App\Exception\EntityNotFoundException;
 use App\Exception\EnrollmentException;
+use App\Exception\EntityNotFoundException;
 use App\Exception\InvalidStatusTransitionException;
 use App\Repository\Interfaces\EnrollmentRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,6 +28,7 @@ class ValidationService
         if (!$user) {
             throw new EntityNotFoundException('User', $userId);
         }
+
         return $user;
     }
 
@@ -35,6 +38,7 @@ class ValidationService
         if (!$lesson) {
             throw new EntityNotFoundException('Lesson', $lessonId);
         }
+
         return $lesson;
     }
 
@@ -44,6 +48,7 @@ class ValidationService
         if (!$course) {
             throw new EntityNotFoundException('Course', $courseId);
         }
+
         return $course;
     }
 

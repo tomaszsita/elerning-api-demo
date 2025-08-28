@@ -1,19 +1,24 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Tests\Service;
 
 use App\Entity\Progress;
-use App\Service\ProgressService;
 use App\Service\ProgressCreationService;
-use App\Service\ProgressStatusService;
 use App\Service\ProgressQueryService;
+use App\Service\ProgressService;
+use App\Service\ProgressStatusService;
 use PHPUnit\Framework\TestCase;
 
 class ProgressServiceTest extends TestCase
 {
     private ProgressService $progressService;
+
     private ProgressCreationService $progressCreationService;
+
     private ProgressStatusService $progressStatusService;
+
     private ProgressQueryService $progressQueryService;
 
     protected function setUp(): void

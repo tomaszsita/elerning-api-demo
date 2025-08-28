@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace App\Tests\Feature;
 
 use App\Entity\Course;
@@ -13,11 +15,11 @@ class CourseControllerTest extends AbstractFeature
         $this->client->request('GET', '/courses');
 
         $this->assertResponseStatusCodeSame(200);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('courses', $responseData);
         $this->assertNotEmpty($responseData['courses']);
-        
+
         $course = $responseData['courses'][0];
         $this->assertArrayHasKey('id', $course);
         $this->assertArrayHasKey('title', $course);
@@ -37,7 +39,7 @@ class CourseControllerTest extends AbstractFeature
         ]));
 
         $this->assertResponseStatusCodeSame(201);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('id', $responseData);
         $this->assertArrayHasKey('user_id', $responseData);
@@ -58,7 +60,7 @@ class CourseControllerTest extends AbstractFeature
         ], $requestBody);
 
         $this->assertResponseStatusCodeSame(400);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('error', $responseData);
         $this->assertStringContainsString($expectedError, $responseData['error']);
@@ -70,17 +72,17 @@ class CourseControllerTest extends AbstractFeature
             'invalid json' => [
                 'Invalid JSON',
                 'invalid json',
-                'Invalid JSON'
+                'Invalid JSON',
             ],
             'missing user_id' => [
                 'Missing user_id',
                 json_encode([]),
-                'user_id is required'
+                'user_id is required',
             ],
             'invalid user_id type' => [
                 'Invalid user_id type',
                 json_encode(['user_id' => 'invalid']),
-                'user_id is required and must be numeric'
+                'user_id is required and must be numeric',
             ],
         ];
     }
@@ -88,7 +90,7 @@ class CourseControllerTest extends AbstractFeature
     #[DataProvider('enrollmentNotFoundProvider')]
     public function testEnrollInCourseNotFound(string $entityType, int $invalidId, string $expectedError): void
     {
-        if ($entityType === 'user') {
+        if ('user' === $entityType) {
             $course = $this->getTestCourse();
             $requestData = ['user_id' => $invalidId];
         } else {
@@ -96,14 +98,14 @@ class CourseControllerTest extends AbstractFeature
             $requestData = ['user_id' => $user->getId()];
         }
 
-        $courseId = $entityType === 'user' ? $course->getId() : $invalidId;
+        $courseId = 'user' === $entityType ? $course->getId() : $invalidId;
 
         $this->client->request('POST', '/courses/' . $courseId . '/enroll', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode($requestData));
 
         $this->assertResponseStatusCodeSame(404);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('error', $responseData);
         $this->assertStringContainsString($expectedError, $responseData['error']);
@@ -112,7 +114,7 @@ class CourseControllerTest extends AbstractFeature
     public static function enrollmentNotFoundProvider(): array
     {
         return [
-            'user not found' => ['user', 99999, 'User 99999 not found'],
+            'user not found'   => ['user', 99999, 'User 99999 not found'],
             'course not found' => ['course', 99999, 'Course 99999 not found'],
         ];
     }
@@ -139,7 +141,7 @@ class CourseControllerTest extends AbstractFeature
         ]));
 
         $this->assertResponseStatusCodeSame(409);
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('error', $responseData);
         $this->assertStringContainsString('already enrolled', $responseData['error']);
@@ -149,7 +151,7 @@ class CourseControllerTest extends AbstractFeature
     {
         // Create a course with only 1 seat
         $course = $this->createCourseWithLimitedSeats(1);
-        
+
         // First user enrolls successfully
         $user1 = $this->getTestUser();
         $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
@@ -162,7 +164,7 @@ class CourseControllerTest extends AbstractFeature
 
         // Second user tries to enroll - should fail because course is full
         $user2 = $this->createTestUser('Jane Smith', 'jane.smith@example.com');
-        
+
         $this->client->request('POST', '/courses/' . $course->getId() . '/enroll', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
@@ -170,7 +172,7 @@ class CourseControllerTest extends AbstractFeature
         ]));
 
         $this->assertResponseStatusCodeSame(409); // Conflict
-        
+
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('error', $responseData);
         $this->assertStringContainsString('is full', $responseData['error']);
