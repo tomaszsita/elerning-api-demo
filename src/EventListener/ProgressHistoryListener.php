@@ -9,15 +9,10 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ProgressHistoryListener
 {
-    private EntityManagerInterface $entityManager;
-    private ProgressHistoryFactory $progressHistoryFactory;
-
     public function __construct(
-        EntityManagerInterface $entityManager,
-        ProgressHistoryFactory $progressHistoryFactory
+        private EntityManagerInterface $entityManager,
+        private ProgressHistoryFactory $progressHistoryFactory
     ) {
-        $this->entityManager = $entityManager;
-        $this->progressHistoryFactory = $progressHistoryFactory;
     }
 
     public function onProgressChanged(ProgressChangedEvent $event): void

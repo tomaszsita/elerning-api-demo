@@ -14,21 +14,12 @@ use Doctrine\ORM\EntityManagerInterface;
 class EnrollmentService
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
-        CourseRepositoryInterface $courseRepository,
-        EnrollmentRepositoryInterface $enrollmentRepository,
-        EnrollmentFactory $enrollmentFactory
+        private EntityManagerInterface $entityManager,
+        private CourseRepositoryInterface $courseRepository,
+        private EnrollmentRepositoryInterface $enrollmentRepository,
+        private EnrollmentFactory $enrollmentFactory
     ) {
-        $this->entityManager = $entityManager;
-        $this->courseRepository = $courseRepository;
-        $this->enrollmentRepository = $enrollmentRepository;
-        $this->enrollmentFactory = $enrollmentFactory;
     }
-
-    private EntityManagerInterface $entityManager;
-    private CourseRepositoryInterface $courseRepository;
-    private EnrollmentRepositoryInterface $enrollmentRepository;
-    private EnrollmentFactory $enrollmentFactory;
 
     public function enrollUser(int $userId, int $courseId): Enrollment
     {

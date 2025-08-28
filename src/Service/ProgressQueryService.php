@@ -8,18 +8,11 @@ use Doctrine\ORM\EntityManagerInterface;
 class ProgressQueryService
 {
     public function __construct(
-        ValidationService $validationService,
-        ProgressRepositoryInterface $progressRepository,
-        EntityManagerInterface $entityManager
+        private ValidationService $validationService,
+        private ProgressRepositoryInterface $progressRepository,
+        private EntityManagerInterface $entityManager
     ) {
-        $this->validationService = $validationService;
-        $this->progressRepository = $progressRepository;
-        $this->entityManager = $entityManager;
     }
-
-    private ValidationService $validationService;
-    private ProgressRepositoryInterface $progressRepository;
-    private EntityManagerInterface $entityManager;
 
     /**
      * @return \App\Entity\Progress[]

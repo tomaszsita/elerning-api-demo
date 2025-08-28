@@ -17,16 +17,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class LoadTestDataCommand extends Command
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
-        TestDataFactory $testDataFactory
+        private EntityManagerInterface $entityManager,
+        private TestDataFactory $testDataFactory
     ) {
         parent::__construct();
-        $this->entityManager = $entityManager;
-        $this->testDataFactory = $testDataFactory;
     }
-
-    private EntityManagerInterface $entityManager;
-    private TestDataFactory $testDataFactory;
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

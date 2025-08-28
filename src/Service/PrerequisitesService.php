@@ -11,15 +11,10 @@ use App\Repository\Interfaces\ProgressRepositoryInterface;
 class PrerequisitesService
 {
     public function __construct(
-        LessonRepositoryInterface $lessonRepository,
-        ProgressRepositoryInterface $progressRepository
+        private LessonRepositoryInterface $lessonRepository,
+        private ProgressRepositoryInterface $progressRepository
     ) {
-        $this->lessonRepository = $lessonRepository;
-        $this->progressRepository = $progressRepository;
     }
-
-    private LessonRepositoryInterface $lessonRepository;
-    private ProgressRepositoryInterface $progressRepository;
 
     public function checkPrerequisites(int $userId, Lesson $lesson): void
     {

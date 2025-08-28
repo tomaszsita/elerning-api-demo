@@ -12,21 +12,12 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class ProgressStatusService
 {
     public function __construct(
-        ProgressRepositoryInterface $progressRepository,
-        EntityManagerInterface $entityManager,
-        EventDispatcherInterface $eventDispatcher,
-        ProgressChangedEventFactory $progressChangedEventFactory
+        private ProgressRepositoryInterface $progressRepository,
+        private EntityManagerInterface $entityManager,
+        private EventDispatcherInterface $eventDispatcher,
+        private ProgressChangedEventFactory $progressChangedEventFactory
     ) {
-        $this->progressRepository = $progressRepository;
-        $this->entityManager = $entityManager;
-        $this->eventDispatcher = $eventDispatcher;
-        $this->progressChangedEventFactory = $progressChangedEventFactory;
     }
-
-    private ProgressRepositoryInterface $progressRepository;
-    private EntityManagerInterface $entityManager;
-    private EventDispatcherInterface $eventDispatcher;
-    private ProgressChangedEventFactory $progressChangedEventFactory;
 
     public function updateProgressStatus(Progress $progress, \App\Enum\ProgressStatus $newStatus, ?string $requestId = null): void
     {

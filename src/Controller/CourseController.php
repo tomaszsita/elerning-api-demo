@@ -10,11 +10,9 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/courses')]
 class CourseController
 {
-    private EnrollmentService $enrollmentService;
-
-    public function __construct(EnrollmentService $enrollmentService)
-    {
-        $this->enrollmentService = $enrollmentService;
+    public function __construct(
+        private EnrollmentService $enrollmentService
+    ) {
     }
 
     #[Route('', methods: ['GET'])]

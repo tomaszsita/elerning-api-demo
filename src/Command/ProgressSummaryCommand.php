@@ -13,12 +13,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'progress:summary', description: 'Show progress summary for a user in a course')]
 class ProgressSummaryCommand extends Command
 {
-    private ProgressService $progressService;
-
-    public function __construct(ProgressService $progressService)
-    {
+    public function __construct(
+        private ProgressService $progressService
+    ) {
         parent::__construct();
-        $this->progressService = $progressService;
     }
 
     protected function configure(): void

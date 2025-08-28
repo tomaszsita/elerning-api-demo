@@ -15,19 +15,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class ShowDataCommand extends Command
 {
     public function __construct(
-        \App\Repository\UserRepository $userRepository,
-        \App\Repository\CourseRepository $courseRepository,
-        \App\Repository\EnrollmentRepository $enrollmentRepository
+        private \App\Repository\UserRepository $userRepository,
+        private \App\Repository\CourseRepository $courseRepository,
+        private \App\Repository\EnrollmentRepository $enrollmentRepository
     ) {
         parent::__construct();
-        $this->userRepository = $userRepository;
-        $this->courseRepository = $courseRepository;
-        $this->enrollmentRepository = $enrollmentRepository;
     }
-
-    private \App\Repository\UserRepository $userRepository;
-    private \App\Repository\CourseRepository $courseRepository;
-    private \App\Repository\EnrollmentRepository $enrollmentRepository;
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

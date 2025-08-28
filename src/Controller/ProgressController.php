@@ -13,15 +13,10 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/progress')]
 class ProgressController
 {
-    private ProgressService $progressService;
-    private ValidatorInterface $validator;
-
     public function __construct(
-        ProgressService $progressService,
-        ValidatorInterface $validator
+        private ProgressService $progressService,
+        private ValidatorInterface $validator
     ) {
-        $this->progressService = $progressService;
-        $this->validator = $validator;
     }
 
     #[Route('', methods: ['POST'])]

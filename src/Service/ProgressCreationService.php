@@ -6,29 +6,20 @@ use App\Entity\Progress;
 use App\Exception\ProgressException;
 use App\Factory\ProgressFactory;
 use App\Repository\Interfaces\ProgressRepositoryInterface;
+use App\Service\PrerequisitesService;
+use App\Service\ValidationService;
 use Doctrine\ORM\EntityManagerInterface;
 
 class ProgressCreationService
 {
     public function __construct(
-        ValidationService $validationService,
-        PrerequisitesService $prerequisitesService,
-        ProgressFactory $progressFactory,
-        ProgressRepositoryInterface $progressRepository,
-        EntityManagerInterface $entityManager
+        private ValidationService $validationService,
+        private PrerequisitesService $prerequisitesService,
+        private ProgressFactory $progressFactory,
+        private ProgressRepositoryInterface $progressRepository,
+        private EntityManagerInterface $entityManager
     ) {
-        $this->validationService = $validationService;
-        $this->prerequisitesService = $prerequisitesService;
-        $this->progressFactory = $progressFactory;
-        $this->progressRepository = $progressRepository;
-        $this->entityManager = $entityManager;
     }
-
-    private ValidationService $validationService;
-    private PrerequisitesService $prerequisitesService;
-    private ProgressFactory $progressFactory;
-    private ProgressRepositoryInterface $progressRepository;
-    private EntityManagerInterface $entityManager;
 
     public function createProgress(int $userId, int $lessonId, string $requestId, string $action = 'complete'): Progress
     {

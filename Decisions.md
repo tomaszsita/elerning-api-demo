@@ -3,6 +3,9 @@
 ## Tech Stack
 Went with Symfony 7 + PHP 8.4. Latest versions show I keep up with current practices, plus Symfony's ecosystem is solid for this kind of project.
 
+### PHP 8 Features
+Used PHP 8 property promotion throughout the codebase to reduce boilerplate code. This makes constructors cleaner and more readable while maintaining the same functionality.
+
 ## Key Decisions
 
 ### Event-Driven Progress History

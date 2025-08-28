@@ -15,15 +15,10 @@ use Doctrine\ORM\EntityManagerInterface;
 class ValidationService
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
-        EnrollmentRepositoryInterface $enrollmentRepository
+        private EntityManagerInterface $entityManager,
+        private EnrollmentRepositoryInterface $enrollmentRepository
     ) {
-        $this->entityManager = $entityManager;
-        $this->enrollmentRepository = $enrollmentRepository;
     }
-
-    private EntityManagerInterface $entityManager;
-    private EnrollmentRepositoryInterface $enrollmentRepository;
 
     public function validateAndGetUser(int $userId): User
     {
